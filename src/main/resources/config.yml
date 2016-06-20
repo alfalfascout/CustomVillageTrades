@@ -1,0 +1,49 @@
+allow_vanilla_trades: false
+currency: emerald
+librarian: 
+    tier1:
+        trade1: 
+            result:
+                material: currency
+                min: 10
+                max: 20
+            ingredient1:
+                material: potato_item
+                min: 1
+                max: 1
+    tier2:
+        trade1:
+            result:
+                material: dirt
+                min: 8
+                max: 16
+                data: 2
+            ingredient1:
+                material: currency
+                min: 1
+                max: 1
+        trade2:
+            result:
+                material: iron_pickaxe
+                min: 1
+                max: 1
+                data: 80
+                enchantment:
+                    level: 15
+                    allow_treasure: false
+            ingredient1:
+                material: dirt
+                min: 1
+                max: 1
+            ingredient2:
+                material: currency
+                min: 3
+                max: 6
+        trade3:
+            result:
+                material: enchanted_book
+                min: 1
+                max: 1
+                enchantment:
+                    level: 30
+                    allow_treasure: true
