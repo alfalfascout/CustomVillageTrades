@@ -70,18 +70,22 @@ public class CareerTier {
         else if (ingredients.get(0).getType().equals(Material.PAPER)) {
             careertier.career = "librarian";
             careertier.tier = 1;
+            saveLibrarian(careertier, villager);
         }
         else if (result.getType().equals(Material.BOOKSHELF)) {
             careertier.career = "librarian";
             careertier.tier = 2;
+            saveLibrarian(careertier, villager);
         }
         else if (result.getType().equals(Material.GLASS)) {
             careertier.career = "librarian";
             careertier.tier = 3;
+            saveLibrarian(careertier, villager);
         }
         else if (result.getType().equals(Material.NAME_TAG)) {
             careertier.career = "librarian";
             careertier.tier = 6;
+            saveLibrarian(careertier, villager);
         }
         else if (result.getType().equals(Material.ENCHANTED_BOOK)) {
             careertier.career = "librarian";
@@ -166,8 +170,16 @@ public class CareerTier {
         
         
         if (careertier.career == "librarian" && careertier.tier == 0) {
-            careertier.tier = getLastTier(careertier, villager, recipe) + 1;
+        	plugin.getLogger().info("Career is librarian, tier unknown.");
+            careertier.tier = getLastTier(careertier, villager, recipe);
+            if (careertier.tier > 1) {
+            	careertier.tier++;
+            }
+            saveLibrarian(careertier, villager);
         }
+        
+        plugin.getLogger().info("Career is " + careertier.career + 
+        		", tier is " + Integer.toString(careertier.tier));
         
         return careertier;
     }
@@ -180,6 +192,7 @@ public class CareerTier {
         //check the librarian file
         String villagerid = "id" + Integer.toString(villager.getEntityId());
         if (plugin.getLibrarians().contains(villagerid)) {
+        	plugin.getLogger().info("Librarian file has this librarian.");
             last = plugin.getLibrarians().getInt(villagerid);
         }
         //check librarian tier list against their trade list
@@ -212,7 +225,20 @@ public class CareerTier {
         }
         
         
-        
+        plugin.getLogger().info("Last tier for this librarian was " + 
+        		Integer.toString(last));
         return last;
+    }
+    
+    public static void saveLibrarian(CareerTier careertier, Villager villager) {
+    	String librarian_id = "id" + Integer.toString(villager.getEntityId());
+    	if (!plugin.getLibrarians().contains(librarian_id)) {
+    		plugin.getLogger().info("This is a new librarian! " +
+    				"Adding to librarians.yml");
+    		plugin.getLibrarians().createSection(librarian_id);
+    	}
+    	plugin.getLogger().info("Saving librarian's tier as " +
+    			Integer.toString(careertier.tier));
+		plugin.getLibrarians().set(librarian_id, careertier.tier);
     }
 }
