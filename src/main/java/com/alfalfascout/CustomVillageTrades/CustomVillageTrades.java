@@ -3,6 +3,7 @@ package com.alfalfascout.CustomVillageTrades;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random; 
 import org.bukkit.Bukkit;
@@ -27,8 +28,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         createFiles();
         getDefaultConfigs();
-        getLogger().info("Librarians: " +
-                Boolean.toString(librarians.contains("id0")));
     }
     
     public void onDisable() {
@@ -55,7 +54,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     			new File(getDataFolder(), "vanilla.yml"));
     }
     
+    
     public void getDefaultConfigs() {
+    	// get currency, default is emerald
         if (getConfig().contains("currency")) {
             currency = Material.matchMaterial(
                     getConfig().getString("currency"));
@@ -74,6 +75,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
         getLogger().info("Currency is " + currency.toString());
         
+        // are vanilla trades allowed to be created? default false
         if (getConfig().contains("allow_vanilla_trades")) {
             try {
                 vanilla_trades = getConfig().getBoolean("allow_vanilla_trades");
@@ -84,7 +86,23 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         "should be true or false.");
             }
         }
+        else {
+        	getConfig().createSection("allow_vanilla_trades");
+        	getConfig().set("allow_vanilla_trades", "false");
+        }
+        
+        // make sure all the villager types are in the config
+        List<String> villager_list = Arrays.asList("librarian", "cleric",
+        		"farmer", "fletcher", "fisherman", "shepherd", "butcher",
+        		"leatherworker", "armorer", "toolsmith", "weaponsmith");
+        for (String villager_type : villager_list) {
+        	if (!getConfig().contains(villager_type)) {
+        		getConfig().createSection(villager_type);
+        		getConfig().set(villager_type, "default");
+        	}
+        }
     }
+    
     
     @EventHandler
     public void onTradeAcquire(VillagerAcquireTradeEvent e) {
