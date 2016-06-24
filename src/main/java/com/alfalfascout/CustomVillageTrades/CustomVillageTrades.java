@@ -20,7 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class CustomVillageTrades extends JavaPlugin implements Listener {
     Random rand = new Random();
-    Material currency;
+    static Material currency;
     boolean vanilla_trades;
     private FileConfiguration config, villagers, vanilla;
     
@@ -128,6 +128,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         if (!vanilla_trades) {
         	getLogger().info("Cancelling vanilla trade event.");
         	e.setCancelled(!vanilla_trades);
+        }
+        else if (!currency.equals(Material.EMERALD)) {
+        	recipe = changeVanillaCurrency(recipe);
+        	e.setRecipe(recipe);
         }
     }
         
@@ -310,6 +314,27 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             }
         }
         return item;
+    }
+    
+    public static MerchantRecipe changeVanillaCurrency(MerchantRecipe recipe) {
+		ItemStack result = recipe.getResult();
+		List<ItemStack> ingredients = recipe.getIngredients();
+		
+    	if (result.getType().equals(Material.EMERALD)) {
+    		result.setType(currency);
+    		recipe = new MerchantRecipe(result, 7);
+    	}
+    	
+    	
+    	for (ItemStack ingredient : ingredients) {
+    		if (ingredient.getType().equals(Material.EMERALD)) {
+    			ingredient.setType(currency);
+    		}
+    	}
+    	
+    	recipe.setIngredients(ingredients);
+    	
+    	return recipe;
     }
     
 }
