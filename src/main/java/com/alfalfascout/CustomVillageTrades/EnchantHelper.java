@@ -95,12 +95,24 @@ public class EnchantHelper {
         return num < min ? min : (num > max ? max : num);
     }
     
-    public static ItemStack randomEnchantedBook(CustomVillageTrades instance,
+    public static Enchantment getRandomEnchantment(
+    		CustomVillageTrades instance, ItemStack item) {
+    	List<Enchantment> list = new ArrayList<Enchantment>();
+    	for (Enchantment enchantment : Enchantment.values()) {
+    		if (enchantment.canEnchantItem(item)) {
+    			list.add(enchantment);
+    		}
+    	}
+    	return list.get(rand.nextInt(list.size()));
+    }
+    
+    public static ItemStack randomlyEnchantBook(CustomVillageTrades instance,
             int level, boolean allowTreasure) {
         ItemStack book = new ItemStack(Material.BOOK);
         List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
         while(list.size() < 1) {
-        	list = buildEnchantmentList(instance, book, level, allowTreasure);
+        	list = buildLeveledEnchantmentList(
+        			instance, book, level, allowTreasure);
         }
         
         book.setType(Material.ENCHANTED_BOOK);
@@ -111,13 +123,14 @@ public class EnchantHelper {
         
     
     // Returns a random enchantment roughly equivalent to mc's random enchants
-    public static ItemStack randomEnchantment(CustomVillageTrades instance,
+    public static ItemStack randomlyEnchant(CustomVillageTrades instance,
     		ItemStack item, int level, boolean allowTreasure) {
         if (enchantable_items.contains(item.getType())) {
             boolean isBook = item.getType() == Material.BOOK;
             List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
             while(list.size() < 1) {
-            	list = buildEnchantmentList(instance, item, level, allowTreasure);
+            	list = buildLeveledEnchantmentList(
+            			instance, item, level, allowTreasure);
             }
             
             if (isBook) {
@@ -132,7 +145,7 @@ public class EnchantHelper {
     }
     
     // Makes a list of enchantments an item might have
-    public static List<LeveledEnchantment> buildEnchantmentList(
+    public static List<LeveledEnchantment> buildLeveledEnchantmentList(
     		CustomVillageTrades instance, ItemStack item,
             int level, boolean allowTreasure) {
         List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
@@ -171,7 +184,7 @@ public class EnchantHelper {
         float f = (rand.nextFloat() + rand.nextFloat() - 1.0F) * 0.15F;
         level = clamp_int(Math.round((float)level + (float)level * f),
                 1, Integer.MAX_VALUE);
-        List<LeveledEnchantment> list1 = getEnchantments(instance, item,
+        List<LeveledEnchantment> list1 = getLeveledEnchantments(instance, item,
                 level, allowTreasure);
         
         if (!list1.isEmpty()) {
@@ -195,7 +208,7 @@ public class EnchantHelper {
     }
     
     // Get all enchantments that might apply to an item
-    public static List<LeveledEnchantment> getEnchantments(
+    public static List<LeveledEnchantment> getLeveledEnchantments(
     		CustomVillageTrades instance, ItemStack item,
             int level, boolean allowTreasure) {
         List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();

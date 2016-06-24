@@ -21,7 +21,7 @@ public class LeveledEnchantment extends EnchantmentWrapper {
     }
 
     public int getWeight() {
-        return weight;
+        return this.weight;
     }
 
     public void setWeight(int id) {

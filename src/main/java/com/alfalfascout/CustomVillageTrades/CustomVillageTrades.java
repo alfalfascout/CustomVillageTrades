@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -270,47 +271,120 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             
         }
         
+        // get enchantments
         if (getConfig().contains(path + ".enchantment")) {
-            int level = 1;
-            boolean allow_treasure = false;
             
-            if (getConfig().contains(path + ".enchantment.level")) {
-                try {
-                    level = getConfig().getInt(path + ".enchantment.level");
-                    if (level < 0) {
+            // get user-specified enchantments
+            if (getConfig().contains(path + ".enchantment.enchant1")) {
+            	String enchant_path = path + ".enchantment.enchant1";
+            	int enchant_num = 1;
+            	
+            	while (getConfig().contains(enchant_path)) {
+            		getLogger().info("Getting enchant at " + path);
+            		int spec_level = 1;
+            		Enchantment spec_type = Enchantment.DURABILITY;
+            		
+            		if (getConfig().contains(enchant_path + ".type")) {
+            			String typestring = getConfig().getString(
+            					enchant_path + ".type").toUpperCase();
+            			
+            			if (typestring.equals("random")) {
+            				spec_type = EnchantHelper.getRandomEnchantment(
+            						this, item);
+            			}
+            			else {
+                			spec_type = Enchantment.getByName(typestring);
+            			}
+            			
+            			if (spec_type == null) {
+            				getLogger().info("No valid type: " + typestring);
+            				spec_type = Enchantment.DURABILITY;
+            			}
+            			getLogger().info("Type is " + spec_type.toString());
+            		}
+            		
+            		if (getConfig().contains(enchant_path + ".level")) {
+            			String levelstring = getConfig().getString(
+            					enchant_path + ".level");
+            			
+            			if (levelstring.equals("random")) {
+            				spec_level = rand.nextInt(
+            						spec_type.getMaxLevel()) + 1;
+            			}
+            			else {
+            				spec_level = getConfig().getInt(
+                					enchant_path + ".level");
+            			}
+            			getLogger().info("Level is " + 
+            					Integer.toString(spec_level));
+            		}
+            		
+            		LeveledEnchantment spec_enchant = new LeveledEnchantment(
+            				this, spec_type.hashCode(), spec_level);
+            		
+            		getLogger().info("Attempting to apply " + 
+            				spec_enchant.getEnchantment() + 
+            				" to " + item.toString());
+            		
+            		if (spec_enchant.canEnchantItem(item)) {
+            			EnchantHelper.applyEnchantment(
+            					this, item, spec_enchant);
+            		}
+            		else {
+            			getLogger().info("This enchantment can't be applied" + 
+            					"to this item.");
+            		}
+            		
+            		enchant_num++;
+            		enchant_path = (path + ".enchantment.enchant" + 
+            				Integer.toString(enchant_num));
+            	}
+            }
+            
+            // OR generate random enchantments
+            else {
+            	int level = 1;
+                boolean allow_treasure = false;
+                
+            	if (getConfig().contains(path + ".enchantment.level")) {
+            		try {
+            			level = getConfig().getInt(path + ".enchantment.level");
+            			if (level < 0) {
                     	getLogger().warning(
                     			"Enchantment level must be greater than zero.");
                     	level = 1;
-                    }
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                    getLogger().warning("The value in " + path + 
-                            ".enchantment.level should be an integer.");
-                }
-            }
+            			}
+            		}
+            		catch (Exception e) {
+                		e.printStackTrace();
+                    	getLogger().warning("The value in " + path + 
+                    		".enchantment.level should be an integer.");
+                	}
+            	}
             
-            if (getConfig().contains(path + ".enchantment.allow_treasure")) {
-                try {
-                    allow_treasure = getConfig().getBoolean(path
-                            + ".enchantment.allow_treasure");
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                    getLogger().warning("The value in " + path + 
-                            ".enchantment.allow_treasure should be " +
-                            "true or false.");
-                }
-            }
-            
-            if (item.getType().equals(Material.ENCHANTED_BOOK) ||
-                    item.getType().equals(Material.BOOK)) {
-                item = EnchantHelper.randomEnchantedBook(this,
-                        level, allow_treasure);
-            }
-            else {
-                item = EnchantHelper.randomEnchantment(this, 
-                        item, level, allow_treasure);
+	            
+	            if (getConfig().contains(path + ".enchantment.allow_treasure")) {
+	                try {
+	                    allow_treasure = getConfig().getBoolean(path
+	                            + ".enchantment.allow_treasure");
+	                }
+	                catch (Exception e) {
+	                    e.printStackTrace();
+	                    getLogger().warning("The value in " + path + 
+	                            ".enchantment.allow_treasure should be " +
+	                            "true or false.");
+	                }
+	            }
+	            
+	            if (item.getType().equals(Material.ENCHANTED_BOOK) ||
+	                    item.getType().equals(Material.BOOK)) {
+	                item = EnchantHelper.randomlyEnchantBook(this,
+	                        level, allow_treasure);
+	            }
+	            else {
+	                item = EnchantHelper.randomlyEnchant(this, 
+	                        item, level, allow_treasure);
+	            }
             }
         }
         return item;
