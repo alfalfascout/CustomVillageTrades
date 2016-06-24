@@ -20,9 +20,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class CustomVillageTrades extends JavaPlugin implements Listener {
     Random rand = new Random();
-    Material currency = Material.EMERALD;
+    Material currency;
     boolean vanilla_trades;
-    private FileConfiguration config, librarians, vanilla;
+    private FileConfiguration config, villagers, vanilla;
     
     public void onEnable() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
@@ -32,15 +32,15 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     public void onDisable() {
         try {
-            librarians.save(new File(getDataFolder(), "librarians.yml"));
+            villagers.save(new File(getDataFolder(), "villagers.yml"));
         } catch (IOException e) {
             e.printStackTrace();
         }
         saveConfig();
     }
     
-    public FileConfiguration getLibrarians() {
-        return this.librarians;
+    public FileConfiguration getVillagers() {
+        return this.villagers;
     }
     
     public FileConfiguration getVanilla() {
@@ -48,8 +48,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     }
     
     public void createFiles() {
-    	librarians = YamlConfiguration.loadConfiguration(
-    			new File(getDataFolder(), "librarians.yml"));
+    	villagers = YamlConfiguration.loadConfiguration(
+    			new File(getDataFolder(), "villagers.yml"));
     	vanilla = YamlConfiguration.loadConfiguration(
     			new File(getDataFolder(), "vanilla.yml"));
     }
@@ -101,6 +101,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         		getConfig().set(villager_type, "default");
         	}
         }
+        saveConfig();
     }
     
     
@@ -191,23 +192,25 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     }
     
     public ItemStack getItemInTrade(String path) {
+    	getLogger().info(path + ".material");
         String material_name = getConfig().getString(path + ".material");
         Material item_type;
+        getLogger().info("Currency is " + currency.toString());
         
         // get the item type
-        if (material_name == "currency") {
+        if (material_name.equals("currency")) {
             item_type = currency;
             getLogger().info("Material is " + currency.toString());
         }
         else {
             item_type = Material.matchMaterial(material_name);
-            getLogger().info("Material is " + item_type.toString());
             
             if (item_type == null) {
                 item_type = Material.COBBLESTONE;
                 getLogger().warning("No material matching '" + 
                         material_name + "'. It's cobbles now. " + path);
             }
+            getLogger().info("Material is " + item_type.toString());
         }
         
         ItemStack item = new ItemStack(item_type);
@@ -298,11 +301,11 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             
             if (item.getType().equals(Material.ENCHANTED_BOOK) ||
                     item.getType().equals(Material.BOOK)) {
-                item = EnchantHelper.randomEnchantedBook(
+                item = EnchantHelper.randomEnchantedBook(this,
                         level, allow_treasure);
             }
             else {
-                item = EnchantHelper.randomEnchantment(
+                item = EnchantHelper.randomEnchantment(this, 
                         item, level, allow_treasure);
             }
         }

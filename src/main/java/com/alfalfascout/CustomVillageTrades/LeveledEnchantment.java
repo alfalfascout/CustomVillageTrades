@@ -5,13 +5,15 @@ import java.util.List;
 import java.util.Random;
 
 public class LeveledEnchantment extends EnchantmentWrapper {
+    static CustomVillageTrades plugin;
     private int level;
     private int weight;
     
-    public LeveledEnchantment(int id, int level) {
+    public LeveledEnchantment(CustomVillageTrades instance, int id, int level) {
         super(id);
         this.level = level;
         this.setWeight(id);
+        plugin = instance;
     }
     
     public int getLevel() {
@@ -45,8 +47,9 @@ public class LeveledEnchantment extends EnchantmentWrapper {
     }
     
     public static LeveledEnchantment getRandomLeveledEnchant(
+    		CustomVillageTrades instance, 
             List<LeveledEnchantment> list, Random rand) {
-        LeveledEnchantment chosenEnchant = new LeveledEnchantment(0, 0);
+        LeveledEnchantment chosenEnchant = new LeveledEnchantment(instance, 0, 0);
         int totalWeight = 0;
         int i = 0;
         int j;
@@ -67,7 +70,6 @@ public class LeveledEnchantment extends EnchantmentWrapper {
                 return chosenEnchant;
             }
         }
-        
         return (LeveledEnchantment)null;
     }
 }
