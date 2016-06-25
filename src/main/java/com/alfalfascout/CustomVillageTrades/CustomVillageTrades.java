@@ -48,11 +48,20 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return this.vanilla;
     }
     
+    public FileConfiguration getInfo(String file) {
+    	if (file.equals("vanilla")) {
+    		return getVanilla();
+    	}
+    	else {
+    		return getConfig();
+    	}
+    }
+    
     public void createFiles() {
     	villagers = YamlConfiguration.loadConfiguration(
     			new File(getDataFolder(), "villagers.yml"));
     	vanilla = YamlConfiguration.loadConfiguration(
-    			new File(getDataFolder(), "vanilla.yml"));
+    			new File(getDataFolder(), "vanilla_trades.yml"));
     }
     
     
@@ -120,7 +129,12 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             String path = trade.career + ".tier" + 
                         Integer.toString(trade.tier);
             getLogger().info("Finding trades in tier " + path);
-            List<MerchantRecipe> new_trades = getTradesInTier(path);
+            List<MerchantRecipe> new_trades = getTradesInTier("config", path);
+            if (getConfig().getString(trade.career).equals("default")) {
+            	List<MerchantRecipe> vanilla_trades = 
+            			getTradesInTier("vanilla", path);
+            	new_trades.addAll(vanilla_trades);
+            }
             
             for (MerchantRecipe new_trade : new_trades) {
                 addRecipe(villager, new_trade);
@@ -145,12 +159,17 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         villager.setRecipes(newrecipes);
     }
     
-    public List<MerchantRecipe> getTradesInTier(String path) {
+    public List<MerchantRecipe> getTradesInTier(String f, String path) {
         List<MerchantRecipe> list = new ArrayList<MerchantRecipe>();
+        
+        if (getConfig().isString(path) &&
+        		getConfig().getString(path).equals("default")) {
+        	f = "vanilla";
+        }
         
         int trade_num = 1;
         
-        while (getConfig().contains(path + ".trade" + 
+        while (getInfo(f).contains(path + ".trade" + 
         		Integer.toString(trade_num))) {
             String trade_path = path + ".trade" + Integer.toString(trade_num);
             ItemStack result = new ItemStack(Material.DIRT);
@@ -159,8 +178,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             getLogger().info("Getting trade in " + trade_path);
             
             getLogger().info("Getting result");
-            if (getConfig().contains(trade_path + ".result")) {
-            	result = new ItemStack(getItemInTrade(
+            if (getInfo(f).contains(trade_path + ".result")) {
+            	result = new ItemStack(getItemInTrade(f, 
             			trade_path + ".result"));
             }
             else {
@@ -168,8 +187,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             }
             
             getLogger().info("Getting first ingredient");
-            if (getConfig().contains(trade_path + ".ingredient1")) {
-            	ingredients.add(new ItemStack(getItemInTrade(
+            if (getInfo(f).contains(trade_path + ".ingredient1")) {
+            	ingredients.add(new ItemStack(getItemInTrade(f, 
             			trade_path + ".ingredient1"))); 
             }
             else {
@@ -177,9 +196,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             	ingredients.add(new ItemStack(Material.STONE));
             }
             
-            if (getConfig().contains(trade_path + ".ingredient2")) {
+            if (getInfo(f).contains(trade_path + ".ingredient2")) {
             	getLogger().info("There's another ingredient too");
-                ingredients.add(new ItemStack(getItemInTrade(
+                ingredients.add(new ItemStack(getItemInTrade(f, 
                         trade_path + ".ingredient2")));
             }
             
@@ -196,9 +215,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return list;
     }
     
-    public ItemStack getItemInTrade(String path) {
+    public ItemStack getItemInTrade(String f, String path) {
     	getLogger().info(path + ".material");
-        String material_name = getConfig().getString(path + ".material");
+        String material_name = getInfo(f).getString(path + ".material");
         Material item_type;
         getLogger().info("Currency is " + currency.toString());
         
@@ -221,16 +240,16 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         ItemStack item = new ItemStack(item_type);
         
         // get how many of the item there are
-        if (getConfig().contains(path + ".min") &&
-                getConfig().contains(path + ".max")) {
+        if (getInfo(f).contains(path + ".min") &&
+                getInfo(f).contains(path + ".max")) {
             try {
-                int min = getConfig().getInt(path + ".min");
+                int min = getInfo(f).getInt(path + ".min");
                 if (min < 0) {
                 	getLogger().warning("min must be greater than zero.");
                 	min = 1;
                 }
                 
-                int max = 1 + getConfig().getInt(path + ".max") - min;
+                int max = 1 + getInfo(f).getInt(path + ".max") - min;
                 if (max < min) {
                 	getLogger().warning("max must at least as great as min.");
                 	max = 1;
@@ -256,10 +275,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
         
         // get any extra data/damage value
-        if (getConfig().contains(path + ".data")) {
+        if (getInfo(f).contains(path + ".data")) {
             try {
                 item.setDurability(
-                        (short)getConfig().getInt(path + ".data"));
+                        (short)getInfo(f).getInt(path + ".data"));
                 getLogger().info("Data/dmg is " + 
                         Integer.toString(item.getDurability()));
             }
@@ -272,20 +291,20 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
         
         // get enchantments
-        if (getConfig().contains(path + ".enchantment")) {
+        if (getInfo(f).contains(path + ".enchantment")) {
             
             // get user-specified enchantments
-            if (getConfig().contains(path + ".enchantment.enchant1")) {
+            if (getInfo(f).contains(path + ".enchantment.enchant1")) {
             	String enchant_path = path + ".enchantment.enchant1";
             	int enchant_num = 1;
             	
-            	while (getConfig().contains(enchant_path)) {
+            	while (getInfo(f).contains(enchant_path)) {
             		getLogger().info("Getting enchant at " + path);
             		int spec_level = 1;
             		Enchantment spec_type = Enchantment.DURABILITY;
             		
-            		if (getConfig().contains(enchant_path + ".type")) {
-            			String typestring = getConfig().getString(
+            		if (getInfo(f).contains(enchant_path + ".type")) {
+            			String typestring = getInfo(f).getString(
             					enchant_path + ".type").toUpperCase();
             			
             			if (typestring.equals("random")) {
@@ -303,8 +322,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             			getLogger().info("Type is " + spec_type.toString());
             		}
             		
-            		if (getConfig().contains(enchant_path + ".level")) {
-            			String levelstring = getConfig().getString(
+            		if (getInfo(f).contains(enchant_path + ".level")) {
+            			String levelstring = getInfo(f).getString(
             					enchant_path + ".level");
             			
             			if (levelstring.equals("random")) {
@@ -312,7 +331,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             						spec_type.getMaxLevel()) + 1;
             			}
             			else {
-            				spec_level = getConfig().getInt(
+            				spec_level = getInfo(f).getInt(
                 					enchant_path + ".level");
             			}
             			getLogger().info("Level is " + 
@@ -346,9 +365,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             	int level = 1;
                 boolean allow_treasure = false;
                 
-            	if (getConfig().contains(path + ".enchantment.level")) {
+            	if (getInfo(f).contains(path + ".enchantment.level")) {
             		try {
-            			level = getConfig().getInt(path + ".enchantment.level");
+            			level = getInfo(f).getInt(path + ".enchantment.level");
             			if (level < 0) {
                     	getLogger().warning(
                     			"Enchantment level must be greater than zero.");
@@ -363,9 +382,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             	}
             
 	            
-	            if (getConfig().contains(path + ".enchantment.allow_treasure")) {
+	            if (getInfo(f).contains(path + ".enchantment.allow_treasure")) {
 	                try {
-	                    allow_treasure = getConfig().getBoolean(path
+	                    allow_treasure = getInfo(f).getBoolean(path
 	                            + ".enchantment.allow_treasure");
 	                }
 	                catch (Exception e) {
