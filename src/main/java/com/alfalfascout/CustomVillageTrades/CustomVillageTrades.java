@@ -97,7 +97,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         		"farmer", "fletcher", "fisherman", "shepherd", "butcher",
         		"leatherworker", "armorer", "toolsmith", "weaponsmith");
         for (String villager_type : villager_list) {
-        	if (!getConfig().contains(villager_type)) {
+        	if (!getConfig().contains(villager_type, true)) {
         		getConfig().createSection(villager_type);
         		getConfig().set(villager_type, "default");
         	}
