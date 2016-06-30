@@ -250,7 +250,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 }
                 
                 int max = 1 + getInfo(f).getInt(path + ".max") - min;
-                if (max < min) {
+                if ((max + min) < min) {
                 	getLogger().warning("max must at least as great as min.");
                 	max = 1;
                 }
