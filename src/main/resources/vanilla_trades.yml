@@ -1,5 +1,4 @@
 currency: emerald
-
 farmer:
     tier1:
         trade1:
@@ -24,7 +23,7 @@ farmer:
                 min: 15
                 max: 19
         trade4:
-            result: 
+            result:
                 material: bread
                 min: 2
                 max: 4
@@ -53,7 +52,7 @@ farmer:
                 material: melon_block
                 min: 7
                 max: 12
-        trade2:    
+        trade2:
             result:
                 material: apple
                 min: 5
@@ -83,7 +82,7 @@ fisherman:
                 max: 6
                 data: 0
             ingredient1:
-                material: fish
+                material: raw_fish
                 min: 6
                 max: 6
                 data: 0
@@ -322,10 +321,7 @@ librarian:
                 enchantment:
                     level: 30
                     allow_treasure: true
-            ingredient1:
-                material: currency
-                min: 5
-                max: 64
+            ingredient1: auto
             ingredient2:
                 material: book
     tier2:
@@ -354,14 +350,13 @@ librarian:
         trade1:
             result:
                 material: currency
-        trade2:
-            result:
+            ingredient1:
                 material: written_book
                 min: 2
                 max: 2
         trade2:
             result:
-                material: clock
+                material: watch
             ingredient1:
                 material: currency
                 min: 10
@@ -380,10 +375,7 @@ librarian:
                 enchantment:
                     level: 30
                     allow_treasure: true
-            ingredient1:
-                material: currency
-                min: 5
-                max: 64
+            ingredient1: auto
             ingredient2:
                 material: book
     tier5:
@@ -393,10 +385,7 @@ librarian:
                 enchantment:
                     level: 30
                     allow_treasure: true
-            ingredient1:
-                material: currency
-                min: 5
-                max: 64
+            ingredient1: auto
             ingredient2:
                 material: book
     tier6:
