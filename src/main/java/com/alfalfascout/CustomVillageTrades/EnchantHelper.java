@@ -2,6 +2,7 @@ package com.alfalfascout.CustomVillageTrades;
 
 import java.util.Random;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.bukkit.Material;
@@ -90,19 +91,20 @@ public class EnchantHelper {
     }
     
     // Lifted from mc because I am not writing this out by hand
-    public static int clamp_int(int num, int min, int max)
-    {
+    public static int clamp_int(int num, int min, int max) {
         return num < min ? min : (num > max ? max : num);
     }
     
     public static Enchantment getRandomEnchantment(
     		CustomVillageTrades instance, ItemStack item) {
     	List<Enchantment> list = new ArrayList<Enchantment>();
+    	
     	for (Enchantment enchantment : Enchantment.values()) {
     		if (enchantment.canEnchantItem(item)) {
     			list.add(enchantment);
     		}
     	}
+    	
     	return list.get(rand.nextInt(list.size()));
     }
     
@@ -110,6 +112,7 @@ public class EnchantHelper {
             int level, boolean allowTreasure) {
         ItemStack book = new ItemStack(Material.BOOK);
         List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
+        
         while(list.size() < 1) {
         	list = buildLeveledEnchantmentList(
         			instance, book, level, allowTreasure);
@@ -118,6 +121,7 @@ public class EnchantHelper {
         book.setType(Material.ENCHANTED_BOOK);
         LeveledEnchantment enchantment = list.get(rand.nextInt(list.size()));
         book = applyEnchantment(instance, book, enchantment);
+        
         return book;
     }
         
@@ -128,6 +132,7 @@ public class EnchantHelper {
         if (enchantable_items.contains(item.getType())) {
             boolean isBook = item.getType() == Material.BOOK;
             List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
+            
             while(list.size() < 1) {
             	list = buildLeveledEnchantmentList(
             			instance, item, level, allowTreasure);
@@ -136,6 +141,7 @@ public class EnchantHelper {
             if (isBook) {
                 item.setType(Material.ENCHANTED_BOOK);
             }
+            
             for (LeveledEnchantment enchantment : list) {
             	item = applyEnchantment(instance, item, enchantment);
             }
@@ -245,6 +251,7 @@ public class EnchantHelper {
         return new_pool;
     }
     
+    // Either applies or stores enchantments as appropriate
     public static ItemStack applyEnchantment(CustomVillageTrades instance,
     		ItemStack item, LeveledEnchantment enchantment) {
     	if (item.getType().equals(Material.BOOK) ||
@@ -260,5 +267,83 @@ public class EnchantHelper {
                         enchantment.getLevel());
     	}
     	return item;
+    }
+    
+    // Gets a vanilla-appropriate value in currency for an enchanted book
+    public static ItemStack appraiseEnchantedBook(CustomVillageTrades instance,
+    		ItemStack book) {
+    	ItemStack price = new ItemStack(CustomVillageTrades.currency);
+    	
+    	if (!book.getType().equals(Material.ENCHANTED_BOOK)) {
+    		instance.getLogger().warning(
+    				"Auto pricing is only for enchanted books.");
+    		return price;
+    	}
+    	
+    	EnchantmentStorageMeta meta = 
+    			(EnchantmentStorageMeta) book.getItemMeta();
+    	
+    	if (!meta.hasStoredEnchants()) {
+    		instance.getLogger().warning("This book has no enchantments.");
+    		return price;
+    	}
+    	
+    	Map<Enchantment,Integer> enchants = meta.getStoredEnchants();
+    	
+    	if (enchants.size() > 1) {
+    		instance.getLogger().warning(
+    				"Auto pricing only works for books with one enchantment.");
+    		return price;
+    	}
+
+    	Enchantment type = Enchantment.DURABILITY;
+    	int level = 1;
+    	for (Map.Entry<Enchantment,Integer> enchant : enchants.entrySet()) {
+    		type = enchant.getKey();
+    		level = enchant.getValue();
+    	}
+    	
+    	int amount = 1;
+    	
+    	switch (level) {
+			case 1:
+				amount = rand.nextInt(14) + 5;
+				break;
+			case 2:
+				amount = rand.nextInt(24) + 8;
+				break;
+			case 3:
+				amount = rand.nextInt(34) + 11;
+				break;
+			case 4:
+				amount = rand.nextInt(44) + 14;
+				break;
+			case 5:
+				amount = clamp_int((rand.nextInt(54) + 17), 17, 64);
+				break;
+			default: 
+				amount = 1;
+    	}
+    	
+    	if (treasure.contains(type)) {
+    		amount *= 2;
+    	}
+    	
+    	if (price.getMaxStackSize() == 16) {
+    		amount /= 4;
+    	}
+    	
+    	else if (price.getMaxStackSize() == 1) {
+    		instance.getLogger().warning("In theory, you could charge " + 
+    				Integer.toString(amount) + " " + 
+    				price.getType().toString() + 
+    				" for an enchanted book, but in practicality " +
+    				"the max stack size is " + 
+    				Integer.toString(price.getMaxStackSize()) + ".");
+    	}
+    	
+    	price.setAmount(amount);
+    	
+    	return price;
     }
 }

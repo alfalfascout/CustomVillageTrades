@@ -180,8 +180,18 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             }
             
             if (getInfo(f).contains(trade_path + ".ingredient1")) {
-            	ingredients.add(new ItemStack(getItemInTrade(f, 
-            			trade_path + ".ingredient1"))); 
+            	
+            	if (getInfo(f).getString(
+            			trade_path + ".ingredient1").equals("auto")) {
+            		ingredients.add(
+            				EnchantHelper.appraiseEnchantedBook(this, result));
+            	}
+            	
+            	else {
+            		ingredients.add(new ItemStack(getItemInTrade(f, 
+                			trade_path + ".ingredient1"))); 
+            	}
+            	
             }
             else {
             	getLogger().warning("Main ingredient missing. It's stone now.");
@@ -193,7 +203,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         trade_path + ".ingredient2")));
             }
             
-            getLogger().info("Building recipe.");
             list.add(new MerchantRecipe(result, 7));
             
             for (ItemStack ingredient : ingredients) {
