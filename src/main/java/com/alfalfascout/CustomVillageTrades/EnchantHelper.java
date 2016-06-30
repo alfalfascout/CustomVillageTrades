@@ -100,7 +100,8 @@ public class EnchantHelper {
     	List<Enchantment> list = new ArrayList<Enchantment>();
     	
     	for (Enchantment enchantment : Enchantment.values()) {
-    		if (enchantment.canEnchantItem(item)) {
+    		if (enchantment.canEnchantItem(item) || 
+    				item.getType().equals(Material.ENCHANTED_BOOK)) {
     			list.add(enchantment);
     		}
     	}
@@ -108,18 +109,17 @@ public class EnchantHelper {
     	return list.get(rand.nextInt(list.size()));
     }
     
-    public static ItemStack randomlyEnchantBook(CustomVillageTrades instance,
-            int level, boolean allowTreasure) {
-        ItemStack book = new ItemStack(Material.BOOK);
-        List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
+    // Returns an enchanted book roughly equivalent to a vanilla librarian's
+    public static ItemStack randomlyEnchantBook(CustomVillageTrades instance, 
+    		boolean allowTreasure) {
+        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
         
-        while(list.size() < 1) {
-        	list = buildLeveledEnchantmentList(
-        			instance, book, level, allowTreasure);
-        }
+        Enchantment type = getRandomEnchantment(instance, book);
+        int level = rand.nextInt(type.getMaxLevel()) + 1;
         
-        book.setType(Material.ENCHANTED_BOOK);
-        LeveledEnchantment enchantment = list.get(rand.nextInt(list.size()));
+        LeveledEnchantment enchantment = 
+        		new LeveledEnchantment(instance, type.hashCode(), level);
+        
         book = applyEnchantment(instance, book, enchantment);
         
         return book;
@@ -132,14 +132,14 @@ public class EnchantHelper {
         if (enchantable_items.contains(item.getType())) {
             boolean isBook = item.getType() == Material.BOOK;
             List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
+
+            if (isBook) {
+                item.setType(Material.ENCHANTED_BOOK);
+            }
             
             while(list.size() < 1) {
             	list = buildLeveledEnchantmentList(
             			instance, item, level, allowTreasure);
-            }
-            
-            if (isBook) {
-                item.setType(Material.ENCHANTED_BOOK);
             }
             
             for (LeveledEnchantment enchantment : list) {
@@ -218,7 +218,7 @@ public class EnchantHelper {
     		CustomVillageTrades instance, ItemStack item,
             int level, boolean allowTreasure) {
         List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
-        boolean isBook = item.getType() == Material.BOOK;
+        boolean isBook = item.getType() == Material.ENCHANTED_BOOK;
         
         for (Enchantment enchantment : Enchantment.values()) {
             if ((!treasure.contains(enchantment) || allowTreasure) && 
@@ -254,8 +254,7 @@ public class EnchantHelper {
     // Either applies or stores enchantments as appropriate
     public static ItemStack applyEnchantment(CustomVillageTrades instance,
     		ItemStack item, LeveledEnchantment enchantment) {
-    	if (item.getType().equals(Material.BOOK) ||
-    			item.getType().equals(Material.ENCHANTED_BOOK)) {
+    	if (item.getType().equals(Material.ENCHANTED_BOOK)) {
             EnchantmentStorageMeta meta = 
             		(EnchantmentStorageMeta)item.getItemMeta();
     		meta.addStoredEnchant(enchantment.getEnchantment(),
