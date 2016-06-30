@@ -42,7 +42,7 @@ farmer:
                 material: pumpkin_pie
                 min: 2
                 max: 3
-            ingredient:
+            ingredient1:
                 material: currency
     tier3:
         trade1:
@@ -319,7 +319,6 @@ librarian:
             result:
                 material: enchanted_book
                 enchantment:
-                    level: 30
                     allow_treasure: true
             ingredient1: auto
             ingredient2:
@@ -373,7 +372,6 @@ librarian:
             result:
                 material: enchanted_book
                 enchantment:
-                    level: 30
                     allow_treasure: true
             ingredient1: auto
             ingredient2:
@@ -383,7 +381,6 @@ librarian:
             result:
                 material: enchanted_book
                 enchantment:
-                    level: 30
                     allow_treasure: true
             ingredient1: auto
             ingredient2:
@@ -625,7 +622,7 @@ toolsmith:
                 max: 24
         trade2:
             result:
-                material: iron_shovel
+                material: iron_spade
                 enchantment:
                     level: 19
                     allow_treasure: false
@@ -696,7 +693,7 @@ cleric:
                 material: currency
         trade2:
             result:
-                material: dye
+                material: ink_sack
                 min: 1
                 max: 2
                 data: 4
