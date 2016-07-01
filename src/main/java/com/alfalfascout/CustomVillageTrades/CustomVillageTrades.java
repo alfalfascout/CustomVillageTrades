@@ -48,6 +48,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return this.vanilla;
     }
     
+    // gets either the vanilla trade list or the user's trade list
     public FileConfiguration getInfo(String file) {
     	if (file.equals("vanilla")) {
     		return getVanilla();
@@ -57,8 +58,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     	}
     }
     
+    // makes sure the plugin has all the config flies it needs
     public void createFiles() {
-    	
     	File villagers_file = 
     			new File(getDataFolder(), "villagers.yml");
     	
@@ -120,6 +121,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         		getConfig().set(villager_type, "default");
         	}
         }
+        if (!getConfig().contains("all_villagers", true)) {
+        	getConfig().createSection("all_villagers");
+        	getConfig().set("all_villagers", "none");
+        }
         saveConfig();
     }
     
@@ -137,9 +142,12 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         Integer.toString(trade.tier);
             List<MerchantRecipe> new_trades = getTradesInTier("config", path);
             if (getConfig().getString(trade.career).equals("default")) {
-            	List<MerchantRecipe> vanilla_trades = 
-            			getTradesInTier("vanilla", path);
-            	new_trades.addAll(vanilla_trades);
+            	new_trades.addAll(getTradesInTier("vanilla", path));
+            }
+            
+            path = "all_villagers.tier" + Integer.toString(trade.tier);
+            if (getConfig().contains(path)) {
+            	new_trades.addAll(getTradesInTier("config", path));
             }
             
             for (MerchantRecipe new_trade : new_trades) {

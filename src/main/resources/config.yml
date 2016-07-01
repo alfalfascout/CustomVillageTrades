@@ -11,3 +11,4 @@ leatherworker: default
 armorer: default
 toolsmith: default
 weaponsmith: default
+all_villagers: none
