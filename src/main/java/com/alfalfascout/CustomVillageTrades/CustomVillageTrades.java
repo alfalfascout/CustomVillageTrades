@@ -22,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CustomVillageTrades extends JavaPlugin implements Listener {
     Random rand = new Random();
     static Material currency;
-    boolean vanilla_trades;
+    boolean vanillaTrades;
     private FileConfiguration config, villagers, vanilla;
     
     public void onEnable() {
@@ -60,18 +60,18 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     // makes sure the plugin has all the config flies it needs
     public void createFiles() {
-    	File villagers_file = 
+    	File villagersFile =
     			new File(getDataFolder(), "villagers.yml");
     	
-    	if (!villagers_file.exists()) {
-    		villagers_file.getParentFile().mkdirs();
+    	if (!villagersFile.exists()) {
+    		villagersFile.getParentFile().mkdirs();
     		saveResource("villagers.yml", true);
     	}
     	
-    	villagers = YamlConfiguration.loadConfiguration(villagers_file);
+    	villagers = YamlConfiguration.loadConfiguration(villagersFile);
     	
     	vanilla = YamlConfiguration.loadConfiguration(
-    			getTextResource("vanilla_trades.yml"));
+    			getTextResource("vanillaTrades.yml"));
     }
     
     
@@ -98,7 +98,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         // are vanilla trades allowed to be created? default false
         if (getConfig().contains("allow_vanilla_trades")) {
             try {
-                vanilla_trades = getConfig().getBoolean("allow_vanilla_trades");
+                vanillaTrades = getConfig().getBoolean("allow_vanilla_trades");
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -112,13 +112,13 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
         
         // make sure all the villager types are in the config
-        List<String> villager_list = Arrays.asList("librarian", "cleric",
+        List<String> villagerList = Arrays.asList("librarian", "cleric",
         		"farmer", "fletcher", "fisherman", "shepherd", "butcher",
         		"leatherworker", "armorer", "toolsmith", "weaponsmith");
-        for (String villager_type : villager_list) {
-        	if (!getConfig().contains(villager_type, true)) {
-        		getConfig().createSection(villager_type);
-        		getConfig().set(villager_type, "default");
+        for (String villagerType : villagerList) {
+        	if (!getConfig().contains(villagerType, true)) {
+        		getConfig().createSection(villagerType);
+        		getConfig().set(villagerType, "default");
         	}
         }
         if (!getConfig().contains("all_villagers", true)) {
@@ -140,22 +140,22 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         if (trade.tier > 0) {
             String path = trade.career + ".tier" + 
                         Integer.toString(trade.tier);
-            List<MerchantRecipe> new_trades = getTradesInTier("config", path);
+            List<MerchantRecipe> newTrades = getTradesInTier("config", path);
             if (getConfig().getString(trade.career).equals("default")) {
-            	new_trades.addAll(getTradesInTier("vanilla", path));
+            	newTrades.addAll(getTradesInTier("vanilla", path));
             }
             
             path = "all_villagers.tier" + Integer.toString(trade.tier);
             if (getConfig().contains(path)) {
-            	new_trades.addAll(getTradesInTier("config", path));
+            	newTrades.addAll(getTradesInTier("config", path));
             }
             
-            for (MerchantRecipe new_trade : new_trades) {
-                addRecipe(villager, new_trade);
+            for (MerchantRecipe newTrade : newTrades) {
+                addRecipe(villager, newTrade);
             }
         }
-        if (!vanilla_trades) {
-        	e.setCancelled(!vanilla_trades);
+        if (!vanillaTrades) {
+        	e.setCancelled(!vanillaTrades);
         }
         else if (!currency.equals(Material.EMERALD)) {
         	recipe = changeVanillaCurrency(recipe);
@@ -164,12 +164,12 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     }
         
     public void addRecipe(Villager villager, MerchantRecipe recipe) {
-        List<MerchantRecipe> newrecipes = new ArrayList<MerchantRecipe>();
+        List<MerchantRecipe> newRecipes = new ArrayList<MerchantRecipe>();
         for (int i = 0; i < villager.getRecipeCount(); i++) {
-            newrecipes.add(villager.getRecipe(i));
+            newRecipes.add(villager.getRecipe(i));
         }
-        newrecipes.add(recipe);
-        villager.setRecipes(newrecipes);
+        newRecipes.add(recipe);
+        villager.setRecipes(newRecipes);
     }
     
     public List<MerchantRecipe> getTradesInTier(String f, String path) {
@@ -180,33 +180,33 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         	f = "vanilla";
         }
         
-        int trade_num = 1;
+        int tradeNum = 1;
         
         while (getInfo(f).contains(path + ".trade" + 
-        		Integer.toString(trade_num))) {
-            String trade_path = path + ".trade" + Integer.toString(trade_num);
+        		Integer.toString(tradeNum))) {
+            String tradePath = path + ".trade" + Integer.toString(tradeNum);
             ItemStack result = new ItemStack(Material.DIRT);
             List<ItemStack> ingredients = new ArrayList<ItemStack>();
             
-            if (getInfo(f).contains(trade_path + ".result")) {
+            if (getInfo(f).contains(tradePath + ".result")) {
             	result = new ItemStack(getItemInTrade(f, 
-            			trade_path + ".result"));
+            			tradePath + ".result"));
             }
             else {
             	getLogger().warning("Result missing. It's dirt now.");
             }
             
-            if (getInfo(f).contains(trade_path + ".ingredient1")) {
+            if (getInfo(f).contains(tradePath + ".ingredient1")) {
             	
             	if (getInfo(f).getString(
-            			trade_path + ".ingredient1").equals("auto")) {
+            			tradePath + ".ingredient1").equals("auto")) {
             		ingredients.add(
             				EnchantHelper.appraiseEnchantedBook(this, result));
             	}
             	
             	else {
             		ingredients.add(new ItemStack(getItemInTrade(f, 
-                			trade_path + ".ingredient1"))); 
+                			tradePath + ".ingredient1")));
             	}
             	
             }
@@ -215,9 +215,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             	ingredients.add(new ItemStack(Material.STONE));
             }
             
-            if (getInfo(f).contains(trade_path + ".ingredient2")) {
+            if (getInfo(f).contains(tradePath + ".ingredient2")) {
                 ingredients.add(new ItemStack(getItemInTrade(f, 
-                        trade_path + ".ingredient2")));
+                        tradePath + ".ingredient2")));
             }
             
             list.add(new MerchantRecipe(result, 7));
@@ -226,31 +226,31 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 list.get(list.size() - 1).addIngredient(ingredient);
             }
             
-            trade_num++;
+            tradeNum++;
         }
         
         return list;
     }
     
     public ItemStack getItemInTrade(String f, String path) {
-        String material_name = getInfo(f).getString(path + ".material");
-        Material item_type;
+        String materialName = getInfo(f).getString(path + ".material");
+        Material itemType;
         
         // get the item type
-        if (material_name.equals("currency")) {
-            item_type = currency;
+        if (materialName.equals("currency")) {
+            itemType = currency;
         }
         else {
-            item_type = Material.matchMaterial(material_name);
+            itemType = Material.matchMaterial(materialName);
             
-            if (item_type == null) {
-                item_type = Material.COBBLESTONE;
+            if (itemType == null) {
+                itemType = Material.COBBLESTONE;
                 getLogger().warning("No material matching '" + 
-                        material_name + "'. It's cobbles now. " + path);
+                        materialName + "'. It's cobbles now. " + path);
             }
         }
         
-        ItemStack item = new ItemStack(item_type);
+        ItemStack item = new ItemStack(itemType);
         
         // get how many of the item there are
         if (getInfo(f).contains(path + ".min") &&
@@ -304,68 +304,68 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             
             // get user-specified enchantments
             if (getInfo(f).contains(path + ".enchantment.enchant1")) {
-            	String enchant_path = path + ".enchantment.enchant1";
-            	int enchant_num = 1;
+            	String enchantPath = path + ".enchantment.enchant1";
+            	int enchantNum = 1;
             	
-            	while (getInfo(f).contains(enchant_path)) {
-            		int spec_level = 1;
-            		Enchantment spec_type = Enchantment.DURABILITY;
+            	while (getInfo(f).contains(enchantPath)) {
+            		int specLevel = 1;
+            		Enchantment specType = Enchantment.DURABILITY;
             		
-            		if (getInfo(f).contains(enchant_path + ".type")) {
-            			String typestring = getInfo(f).getString(
-            					enchant_path + ".type").toUpperCase();
+            		if (getInfo(f).contains(enchantPath + ".type")) {
+            			String typeString = getInfo(f).getString(
+            					enchantPath + ".type").toUpperCase();
             			
-            			if (typestring.equals("random")) {
-            				spec_type = EnchantHelper.getRandomEnchantment(
+            			if (typeString.equals("random")) {
+            				specType = EnchantHelper.getRandomEnchantment(
             						this, item);
             			}
             			else {
-                			spec_type = Enchantment.getByName(typestring);
+                			specType = Enchantment.getByName(typeString);
             			}
             			
-            			if (spec_type == null) {
-            				getLogger().warning("No valid type: " + typestring);
-            				spec_type = Enchantment.DURABILITY;
+            			if (specType == null) {
+            				getLogger().warning("No valid type: " + typeString);
+            				specType = Enchantment.DURABILITY;
             			}
             		}
             		
-            		if (getInfo(f).contains(enchant_path + ".level")) {
-            			String levelstring = getInfo(f).getString(
-            					enchant_path + ".level");
+            		if (getInfo(f).contains(enchantPath + ".level")) {
+            			String levelString = getInfo(f).getString(
+            					enchantPath + ".level");
             			
-            			if (levelstring.equals("random")) {
-            				spec_level = rand.nextInt(
-            						spec_type.getMaxLevel()) + 1;
+            			if (levelString.equals("random")) {
+            				specLevel = rand.nextInt(
+            						specType.getMaxLevel()) + 1;
             			}
             			else {
-            				spec_level = getInfo(f).getInt(
-                					enchant_path + ".level");
+            				specLevel = getInfo(f).getInt(
+                					enchantPath + ".level");
             			}
             		}
             		
-            		LeveledEnchantment spec_enchant = new LeveledEnchantment(
-            				this, spec_type.hashCode(), spec_level);
+            		LeveledEnchantment specEnchant = new LeveledEnchantment(
+            				this, specType.hashCode(), specLevel);
             		
-            		if (spec_enchant.canEnchantItem(item)) {
+            		if (specEnchant.canEnchantItem(item)) {
             			EnchantHelper.applyEnchantment(
-            					this, item, spec_enchant);
+            					this, item, specEnchant);
             		}
             		else {
             			getLogger().warning("The enchantment " + 
-            					spec_enchant.toString() + 
+            					specEnchant.toString() +
             					" can't be applied to " + item.toString());
             		}
             		
-            		enchant_num++;
-            		enchant_path = (path + ".enchantment.enchant" + 
-            				Integer.toString(enchant_num));
+            		enchantNum++;
+            		enchantPath = (path + ".enchantment.enchant" +
+            				Integer.toString(enchantNum));
             	}
             }
             
             // OR generate random enchantments
             else {
             	int level = 1;
-                boolean allow_treasure = false;
+                boolean allowTreasure = false;
                 
             	if (getInfo(f).contains(path + ".enchantment.level")) {
             		try {
@@ -386,7 +386,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
 	            
 	            if (getInfo(f).contains(path + ".enchantment.allow_treasure")) {
 	                try {
-	                    allow_treasure = getInfo(f).getBoolean(path
+	                    allowTreasure = getInfo(f).getBoolean(path
 	                            + ".enchantment.allow_treasure");
 	                }
 	                catch (Exception e) {
@@ -400,11 +400,11 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
 	            if (item.getType().equals(Material.ENCHANTED_BOOK) ||
 	                    item.getType().equals(Material.BOOK)) {
 	                item = EnchantHelper.randomlyEnchantBook(this, 
-	                		allow_treasure);
+	                		allowTreasure);
 	            }
 	            else {
 	                item = EnchantHelper.randomlyEnchant(this, 
-	                        item, level, allow_treasure);
+	                        item, level, allowTreasure);
 	            }
             }
         }
@@ -431,5 +431,4 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     	
     	return recipe;
     }
-    
 }
