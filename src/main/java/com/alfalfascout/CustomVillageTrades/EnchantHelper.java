@@ -115,6 +115,10 @@ public class EnchantHelper {
         ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
         
         Enchantment type = getRandomEnchantment(instance, book);
+        while (!(!treasure.contains(type) || allowTreasure)) {
+        	type = getRandomEnchantment(instance, book);
+        }
+        
         int level = rand.nextInt(type.getMaxLevel()) + 1;
         
         LeveledEnchantment enchantment = 
