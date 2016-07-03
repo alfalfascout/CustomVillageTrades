@@ -71,7 +71,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     	villagers = YamlConfiguration.loadConfiguration(villagersFile);
     	
     	vanilla = YamlConfiguration.loadConfiguration(
-    			getTextResource("vanillaTrades.yml"));
+    			getTextResource("vanilla_trades.yml"));
     }
     
     
