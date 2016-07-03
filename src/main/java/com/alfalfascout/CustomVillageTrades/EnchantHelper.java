@@ -13,7 +13,7 @@ import org.bukkit.enchantments.*;
 public class EnchantHelper {
     static CustomVillageTrades plugin;
     private static Random rand = new Random();
-    private static List<Material> enchantable_items = Arrays.asList(
+    private static List<Material> enchantableItems = Arrays.asList(
             Material.FISHING_ROD,
             Material.CARROT_STICK, Material.SHEARS, Material.BOOK, Material.BOW,
             Material.FLINT_AND_STEEL, Material.SHIELD, Material.ELYTRA,
@@ -91,7 +91,7 @@ public class EnchantHelper {
     }
     
     // Lifted from mc because I am not writing this out by hand
-    public static int clamp_int(int num, int min, int max) {
+    public static int clampInt(int num, int min, int max) {
         return num < min ? min : (num > max ? max : num);
     }
     
@@ -129,7 +129,7 @@ public class EnchantHelper {
     // Returns a random enchantment roughly equivalent to mc's random enchants
     public static ItemStack randomlyEnchant(CustomVillageTrades instance,
     		ItemStack item, int level, boolean allowTreasure) {
-        if (enchantable_items.contains(item.getType())) {
+        if (enchantableItems.contains(item.getType())) {
             boolean isBook = item.getType() == Material.BOOK;
             List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
 
@@ -188,7 +188,7 @@ public class EnchantHelper {
         level = level + 1 + rand.nextInt(enchantability / 4 + 1) + 
                 rand.nextInt(enchantability / 4 + 1);
         float f = (rand.nextFloat() + rand.nextFloat() - 1.0F) * 0.15F;
-        level = clamp_int(Math.round((float)level + (float)level * f),
+        level = clampInt(Math.round((float)level + (float)level * f),
                 1, Integer.MAX_VALUE);
         List<LeveledEnchantment> list1 = getLeveledEnchantments(instance, item,
                 level, allowTreasure);
@@ -239,16 +239,16 @@ public class EnchantHelper {
     // Remove enchantments from the pool of possibilities based on selected
     public static List<LeveledEnchantment> removeIncompatibleEnchants(
             List<LeveledEnchantment> pool, List<LeveledEnchantment> list) {
-    	List<LeveledEnchantment> new_pool = new ArrayList<LeveledEnchantment>();
-    	new_pool.addAll(pool);
+    	List<LeveledEnchantment> newPool = new ArrayList<LeveledEnchantment>();
+    	newPool.addAll(pool);
         for (LeveledEnchantment possibility : pool) {
             for (LeveledEnchantment selected : list) {
                 if (possibility.conflictsWith(selected)) {
-                    new_pool.remove(possibility);
+                    newPool.remove(possibility);
                 }
             }
         }
-        return new_pool;
+        return newPool;
     }
     
     // Either applies or stores enchantments as appropriate
@@ -318,7 +318,7 @@ public class EnchantHelper {
 				amount = rand.nextInt(44) + 14;
 				break;
 			case 5:
-				amount = clamp_int((rand.nextInt(54) + 17), 17, 64);
+				amount = clampInt((rand.nextInt(54) + 17), 17, 64);
 				break;
 			default: 
 				amount = 1;
