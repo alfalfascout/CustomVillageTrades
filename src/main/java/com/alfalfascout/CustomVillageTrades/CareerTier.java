@@ -168,10 +168,10 @@ public class CareerTier {
         if (careerTier.career == "librarian" && careerTier.tier == 0) {
             careerTier.tier = getLastTier(careerTier, villager, recipe);
             if (careerTier.tier > 1) {
-            	careerTier.tier++;
+                careerTier.tier++;
             }
             else {
-            	careerTier.tier = 0;
+                careerTier.tier = 0;
             }
         }
         
@@ -225,11 +225,11 @@ public class CareerTier {
     }
     
     public static void saveVillager(CareerTier careertier, Villager villager) {
-    	String villager_id = "id" + Integer.toString(villager.getEntityId());
-    	if (!plugin.getVillagers().contains(villager_id)) {
-    		plugin.getVillagers().createSection(villager_id);
-    	}
-    	
-		plugin.getVillagers().set(villager_id, careertier.tier);
+        String villager_id = "id" + Integer.toString(villager.getEntityId());
+        if (!plugin.getVillagers().contains(villager_id)) {
+            plugin.getVillagers().createSection(villager_id);
+        }
+        
+        plugin.getVillagers().set(villager_id, careertier.tier);
     }
 }

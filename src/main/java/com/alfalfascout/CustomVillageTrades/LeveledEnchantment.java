@@ -47,10 +47,10 @@ public class LeveledEnchantment extends EnchantmentWrapper {
     }
     
     public static LeveledEnchantment getRandomLeveledEnchant(
-    		CustomVillageTrades instance, 
+            CustomVillageTrades instance, 
             List<LeveledEnchantment> list, Random rand) {
         LeveledEnchantment chosenEnchant = 
-        		new LeveledEnchantment(instance, 0, 0);
+                new LeveledEnchantment(instance, 0, 0);
         int totalWeight = 0;
         int i = 0;
         int j;
