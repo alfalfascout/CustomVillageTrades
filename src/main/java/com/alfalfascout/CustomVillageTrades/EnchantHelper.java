@@ -343,6 +343,7 @@ public class EnchantHelper {
                     " for an enchanted book, but in practicality " +
                     "the max stack size is " + 
                     Integer.toString(price.getMaxStackSize()) + ".");
+            amount = 1;
         }
         
         price.setAmount(amount);

@@ -86,6 +86,11 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         "Using default.");
                 currency = Material.EMERALD;
             }
+            
+            if (currency.getMaxStackSize() == 1) {
+                getLogger().warning(currency.toString() + " can't stack. " +
+                        "It might not be a good choice of currency.");
+            }
         }
         else {
             getLogger().info("Config has no currency! Adding default.");
@@ -270,9 +275,11 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 
                 int amount = rand.nextInt(max) + min;
                 if (amount > item.getMaxStackSize()) {
-                    getLogger().warning("The maximum stack size for " +
-                            item.getType().toString() + " is " + 
-                            Integer.toString(item.getMaxStackSize()));
+                    if (!f.equals("vanilla")) {
+                        getLogger().warning("The maximum stack size for " +
+                                item.getType().toString() + " is " + 
+                                Integer.toString(item.getMaxStackSize()));
+                    }
                     amount = item.getMaxStackSize();
                 }
                 
@@ -417,6 +424,11 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
         if (result.getType().equals(Material.EMERALD)) {
             result.setType(currency);
+            
+            if (result.getAmount() > result.getMaxStackSize()) {
+                result.setAmount(result.getMaxStackSize());
+            }
+            
             recipe = new MerchantRecipe(result, 7);
         }
         
@@ -424,6 +436,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         for (ItemStack ingredient : ingredients) {
             if (ingredient.getType().equals(Material.EMERALD)) {
                 ingredient.setType(currency);
+                
+                if (ingredient.getAmount() > ingredient.getMaxStackSize()) {
+                    ingredient.setAmount(ingredient.getMaxStackSize());
+                }
             }
         }
         
