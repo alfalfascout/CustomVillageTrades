@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CustomVillageTrades extends JavaPlugin implements Listener {
@@ -290,6 +291,32 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 e.printStackTrace();
                 getLogger().warning("The value in " + path +
                         ".min or .max should be an integer between 1 and 64.");
+            }
+        }
+        
+        // get item name
+        if (getInfo(f).contains(path + ".name")) {
+            ItemMeta meta = item.getItemMeta();
+            try {
+                meta.setDisplayName(getInfo(f).getString(path + ".name"));
+                item.setItemMeta(meta);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        // get item lore
+        if (getInfo(f).contains(path + ".lore")) {
+            ItemMeta meta = item.getItemMeta();
+            List<String> lore = Arrays.asList(
+                    getInfo(f).getString(path + ".lore").split(","));
+            try {
+                meta.setLore(lore);
+                item.setItemMeta(meta);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
         }
         
