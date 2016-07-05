@@ -146,7 +146,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             String path = trade.career + ".tier" + 
                         Integer.toString(trade.tier);
             List<MerchantRecipe> newTrades = getTradesInTier("config", path);
-            if (getConfig().getString(trade.career).equals("default")) {
+            if (getConfig().getString(trade.career).equals("default") && 
+                    !getConfig().getBoolean("allow_vanilla_trades")) {
                 newTrades.addAll(getTradesInTier("vanilla", path));
             }
             
