@@ -1,3 +1,4 @@
+worlds: default
 allow_vanilla_trades: false
 currency: emerald
 librarian: default

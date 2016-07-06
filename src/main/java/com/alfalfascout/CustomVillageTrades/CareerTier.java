@@ -205,9 +205,10 @@ public class CareerTier {
                 }
             }
             else {
-                for (String tier : plugin.getVanilla().getStringList(
+                for (String tier : plugin.getTree("vanilla").conf.getStringList(
                         "librarian")) {
-                    tradesbytier.add(plugin.getVanilla().getList(tier).size() +
+                    tradesbytier.add(
+                            plugin.getTree("vanilla").conf.getList(tier).size() +
                             tradesbytier.get(tradesbytier.size() - 1));
                 }
             }

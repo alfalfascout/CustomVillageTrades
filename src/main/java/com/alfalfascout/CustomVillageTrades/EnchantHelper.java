@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.enchantments.*;
@@ -274,8 +275,8 @@ public class EnchantHelper {
     
     // Gets a vanilla-appropriate value in currency for an enchanted book
     public static ItemStack appraiseEnchantedBook(CustomVillageTrades instance,
-            ItemStack book) {
-        ItemStack price = new ItemStack(CustomVillageTrades.currency);
+            FileConfiguration f, ItemStack book) {
+        ItemStack price = new ItemStack(instance.getCurrency(f));
         
         if (!book.getType().equals(Material.ENCHANTED_BOOK)) {
             instance.getLogger().warning(
