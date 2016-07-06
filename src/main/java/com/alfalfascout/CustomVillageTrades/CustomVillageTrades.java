@@ -104,30 +104,22 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 trees.put(world, new FileAndConfig(treeFile));
             }
             else {
-                getLogger().warning("Undefined file in config: " + 
-                        treeFile.toString());
+                getLogger().info(treeFile.toString() + " is missing! " +
+                        "Creating it now.");
+                try {
+                    treeFile.createNewFile();
+                    trees.put(world, new FileAndConfig(treeFile));
+                    populateTree(getTree(world));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
     
     
     public void getDefaultConfigs() {
-        // make sure all the villager types are in the config. just in case
-        List<String> villagerList = Arrays.asList("librarian", "cleric",
-                "farmer", "fletcher", "fisherman", "shepherd", "butcher",
-                "leatherworker", "armorer", "toolsmith", "weaponsmith");
-        for (String villagerType : villagerList) {
-            if (!getConfig().contains(villagerType, true)) {
-                getConfig().createSection(villagerType);
-                getConfig().set(villagerType, "default");
-            }
-        }
-        if (!getConfig().contains("all_villagers", true)) {
-            getConfig().createSection("all_villagers");
-            getConfig().set("all_villagers", "none");
-        }
-        saveConfig();
-        
+        populateTree(getTree("config"));
         // make sure that all the worlds are in the config
         List<World> allWorlds = this.getServer().getWorlds();
         for (World world : allWorlds) {
@@ -138,49 +130,66 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
     }
     
+    // make sure all villager types, currency, and allow bool are in the tree
+    public void populateTree(FileAndConfig tree) {
+        List<String> villagerList = Arrays.asList("librarian", "cleric",
+                "farmer", "fletcher", "fisherman", "shepherd", "butcher",
+                "leatherworker", "armorer", "toolsmith", "weaponsmith");
+        for (String villagerType : villagerList) {
+            if (!tree.conf.contains(villagerType, true)) {
+                tree.conf.createSection(villagerType);
+                tree.conf.set(villagerType, "default");
+            }
+        }
+        if (!tree.conf.contains("all_villagers", true)) {
+            tree.conf.createSection("all_villagers");
+            tree.conf.set("all_villagers", "none");
+        }
+        
+        if (!tree.conf.contains("currency")) {
+            tree.conf.createSection("currency");
+            tree.conf.set("currency", "emerald");
+        }
+        
+        if (!tree.conf.contains("allow_vanilla_trades")) {
+            tree.conf.createSection("allow_vanilla_trades");
+            tree.conf.set("allow_vanilla_trades", "false");
+        }
+        tree.save();
+    }
+    
+    // get the currency
     public Material getCurrency(FileConfiguration f) {
-        Material currency = Material.EMERALD;
-        if (f.contains("currency")) {
-            currency = Material.matchMaterial(
-                    f.getString("currency"));
-            if (currency == null) {
-                getLogger().warning("No material found matching '" + 
-                        f.getString("currency") + "' at currency. " +
-                        "Using emerald.");
-                currency = Material.EMERALD;
-            }
-            
-            if (currency.getMaxStackSize() == 1) {
-                getLogger().warning(currency.toString() + " can't stack. " +
-                        "It might not be a good choice of currency.");
-            }
+        Material currency = Material.matchMaterial(
+                f.getString("currency"));
+        if (currency == null) {
+            getLogger().warning("No material found matching '" + 
+                    f.getString("currency") + "' at currency. " +
+                    "Using emerald.");
+            currency = Material.EMERALD;
         }
-        else {
-            getLogger().info("Config has no currency! Adding default.");
-            f.createSection("currency");
-            f.set("currency", "emerald");
+        
+        if (currency.getMaxStackSize() == 1) {
+            getLogger().warning(currency.toString() + " can't stack. " +
+                    "It might not be a good choice of currency.");
         }
+        
         return currency;
     }
     
-    
+    // get whether vanilla trades are allowed
     public boolean getAllowVanilla(FileConfiguration f) {
-        // are vanilla trades allowed to be created? default false
         boolean vanillaTrades = false;
-        if (f.contains("allow_vanilla_trades")) {
-            try {
-                vanillaTrades = f.getBoolean("allow_vanilla_trades");
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                getLogger().warning("Value at allow_vanilla_trades " +
-                        "should be true or false.");
-            }
+        
+        try {
+            vanillaTrades = f.getBoolean("allow_vanilla_trades");
         }
-        else {
-            f.createSection("allow_vanilla_trades");
-            f.set("allow_vanilla_trades", "false");
+        catch (Exception e) {
+            e.printStackTrace();
+            getLogger().warning("Value at allow_vanilla_trades " +
+                    "should be true or false.");
         }
+        
         return vanillaTrades;
     }
     
