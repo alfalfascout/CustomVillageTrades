@@ -96,6 +96,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         File treeFile = new File(getDataFolder(), "config.yml");
         for (String world : worlds.keySet()) {
             treeFile = new File(getDataFolder(), worlds.get(world).toString());
+            if (worlds.get(world).toString().equals("none")) {
+                continue;
+            }
             if (treeFile.exists()) {
                 trees.put(world, new FileAndConfig(treeFile));
             }
@@ -177,14 +180,15 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         Villager villager = e.getEntity();
         String location = villager.getEyeLocation().getWorld().getName();
         
-        getLogger().info("New trade in " + location);
-        
         if (trees.containsKey(location)) {
             FileConfiguration file = getTree(location).conf;
             handleTrade(file, e);
         }
         else if (!getConfig().contains("worlds")) {
             handleTrade(getConfig(), e);
+        }
+        else if (getConfig().getString("worlds." + location).equals("none")) {
+            e.setCancelled(true);
         }
     }
         
