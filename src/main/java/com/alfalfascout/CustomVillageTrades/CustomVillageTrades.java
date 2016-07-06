@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Random; 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -126,6 +127,15 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             getConfig().set("all_villagers", "none");
         }
         saveConfig();
+        
+        // make sure that all the worlds are in the config
+        List<World> allWorlds = this.getServer().getWorlds();
+        for (World world : allWorlds) {
+            if (!getConfig().contains("worlds." + world.getName(), true)) {
+                getConfig().createSection("worlds." + world.getName());
+                getConfig().set("worlds." + world.getName(), "config.yml");
+            }
+        }
     }
     
     public Material getCurrency(FileConfiguration f) {
