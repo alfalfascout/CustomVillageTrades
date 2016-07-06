@@ -248,7 +248,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             }
         }
         if (!getAllowVanilla(f)) {
-            e.setCancelled(!getAllowVanilla(f));
+            e.setCancelled(true);
         }
         else if (!getCurrency(f).equals(Material.EMERALD)) {
             recipe = changeVanillaCurrency(f, recipe);
@@ -268,10 +268,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     public List<MerchantRecipe> getTradesInTier(
             FileConfiguration f, String path) {
         List<MerchantRecipe> list = new ArrayList<MerchantRecipe>();
-        
-        if (getTree("vanilla").conf == f) {
-            
-        }
         
         if (f.isString(path) &&
                 f.getString(path).equals("default")) {

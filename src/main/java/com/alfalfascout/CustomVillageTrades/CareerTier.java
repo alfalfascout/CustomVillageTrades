@@ -183,7 +183,7 @@ public class CareerTier {
     }
     
     //figure out what tier a librarian is in
-    public static int getLastTier(CareerTier careertier,
+    public static int getLastTier(CareerTier careerTier,
             Villager villager, MerchantRecipe recipe) {
         int last = 0;
         
@@ -194,27 +194,27 @@ public class CareerTier {
         }
         //check librarian tier list against their trade list
         else if (plugin.getConfig().contains("librarian")) {
-            List<Integer> tradesbytier = new ArrayList<Integer>();
+            List<Integer> tradesByTier = new ArrayList<Integer>();
             int currenttrades = villager.getRecipeCount();
             
             if (plugin.getConfig().getString("librarian") != "default") {
                 for (String tier : plugin.getConfig().getStringList(
                         "librarian")) {
-                    tradesbytier.add(plugin.getConfig().getList(tier).size() + 
-                            tradesbytier.get(tradesbytier.size() - 1));
+                    tradesByTier.add(plugin.getConfig().getList(tier).size() + 
+                            tradesByTier.get(tradesByTier.size() - 1));
                 }
             }
             else {
                 for (String tier : plugin.getTree("vanilla").conf.getStringList(
                         "librarian")) {
-                    tradesbytier.add(
+                    tradesByTier.add(
                             plugin.getTree("vanilla").conf.getList(tier).size() +
-                            tradesbytier.get(tradesbytier.size() - 1));
+                            tradesByTier.get(tradesByTier.size() - 1));
                 }
             }
-            for (int trades : tradesbytier) {
+            for (int trades : tradesByTier) {
                 if (currenttrades < trades) {
-                    last = tradesbytier.indexOf(trades);
+                    last = tradesByTier.indexOf(trades);
                 }
             }
         }
@@ -225,12 +225,12 @@ public class CareerTier {
         return last;
     }
     
-    public static void saveVillager(CareerTier careertier, Villager villager) {
+    public static void saveVillager(CareerTier careerTier, Villager villager) {
         String villager_id = "id" + Integer.toString(villager.getEntityId());
         if (!plugin.getVillagers().contains(villager_id)) {
             plugin.getVillagers().createSection(villager_id);
         }
         
-        plugin.getVillagers().set(villager_id, careertier.tier);
+        plugin.getVillagers().set(villager_id, careerTier.tier);
     }
 }
