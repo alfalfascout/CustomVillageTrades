@@ -64,19 +64,27 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     public void createFiles() {
         trees = new HashMap<String,FileAndConfig>();
         
+        // the file keeping track of villager career tiers
         File villagersFile =
                 new File(getDataFolder(), "villagers.yml");
-        
         if (!villagersFile.exists()) {
             villagersFile.getParentFile().mkdirs();
             saveResource("villagers.yml", true);
         }
-        
         villagers = YamlConfiguration.loadConfiguration(villagersFile);
         
+        // the file with some example trades
+        File exampleFile = new File(getDataFolder(), "trades_example.yml");
+        if (!exampleFile.exists()) {
+            villagersFile.getParentFile().mkdirs();
+            saveResource("trades_example.yml", true);
+        }
+        
+        // vanilla trades (not modifiable by the user)
         Reader vanillaReader = getTextResource("vanilla_trades.yml");
         trees.put("vanilla", new FileAndConfig(vanillaReader));
         
+        // main config file
         File configFile = new File(getDataFolder(), "config.yml");
         FileAndConfig cfc = new FileAndConfig(configFile, getConfig());
         trees.put("config", cfc);
