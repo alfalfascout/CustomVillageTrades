@@ -50,8 +50,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     // gets either the vanilla trade list or the user's trade list
     public FileAndConfig getTree(String file) {
-        getLogger().info("trees contains " + file + ": " +
-                trees.containsKey(file));
         
         if (trees.containsKey(file)) {
             return trees.get(file);
@@ -106,7 +104,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         treeFile.toString());
             }
         }
-        getLogger().info(trees.toString());
     }
     
     
