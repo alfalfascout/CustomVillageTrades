@@ -472,7 +472,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                     LeveledEnchantment specEnchant = new LeveledEnchantment(
                             this, specType.hashCode(), specLevel);
                     
-                    if (specEnchant.canEnchantItem(item)) {
+                    if (specEnchant.canEnchantItem(item) || 
+                            item.getType().equals(Material.ENCHANTED_BOOK)) {
                         EnchantHelper.applyEnchantment(
                                 this, item, specEnchant);
                     }
