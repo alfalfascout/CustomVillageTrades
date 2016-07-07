@@ -28,10 +28,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CustomVillageTrades extends JavaPlugin implements Listener {
     static Random rand = new Random();
     private static FileConfiguration villagers;
-    private static Map<String,FileAndConfig> trees;
+    static Map<String,FileAndConfig> trees;
     
     public void onEnable() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        this.getCommand("customvillagetrades").setExecutor(
+                new CvtCommand(this));
         createFiles();
         getDefaultConfigs();
     }
@@ -89,9 +91,19 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         FileAndConfig cfc = new FileAndConfig(configFile, getConfig());
         trees.put("config", cfc);
         
-        if (getConfig().contains("worlds")) {
-            if (!getConfig().getString("worlds").equals("default")) {
-                loadTreesByWorld();
+        if (!getConfig().contains("worlds")) {
+            getConfig().createSection("worlds");
+        }
+        populateWorlds();
+        loadTreesByWorld();
+    }
+    
+    public void populateWorlds() {
+        List<World> allWorlds = this.getServer().getWorlds();
+        for (World world : allWorlds) {
+            if (!getConfig().contains("worlds." + world.getName(), true)) {
+                getConfig().createSection("worlds." + world.getName());
+                getConfig().set("worlds." + world.getName(), "config.yml");
             }
         }
     }
@@ -128,14 +140,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     public void getDefaultConfigs() {
         populateTree(getTree("config"));
-        // make sure that all the worlds are in the config
-        List<World> allWorlds = this.getServer().getWorlds();
-        for (World world : allWorlds) {
-            if (!getConfig().contains("worlds." + world.getName(), true)) {
-                getConfig().createSection("worlds." + world.getName());
-                getConfig().set("worlds." + world.getName(), "config.yml");
-            }
-        }
     }
     
     // make sure all villager types, currency, and allow bool are in the tree

@@ -1,4 +1,5 @@
-worlds: default
+worlds:
+    world: config.yml
 allow_vanilla_trades: false
 currency: emerald
 librarian: default

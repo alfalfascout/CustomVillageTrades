@@ -1,4 +1,20 @@
 name: CustomVillageTrades
 main: com.alfalfascout.CustomVillageTrades.CustomVillageTrades
-version: 0.4.2
+version: 0.5.0
 description: "Changes villagers' trade lists to a customizable list."
+
+commands:
+    customvillagetrades:
+        description: CustomVillageTrades utility command.
+        usage: /customvillagetrades
+        permission: customvillagetrades
+        aliases: [cvt, trades]
+        
+permissions:
+    customvillagetrades.*:
+        description: Gives access to all CustomVillageTrades commands.
+        children:
+            customvillagetrades.reload: true
+    customvillagetrades.reload:
+        description: Reloads worlds and trade trees from the config files.
+        default: op
