@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.alfalfascout</groupId>
   <artifactId>CustomVillageTrades</artifactId>
-  <version>0.5.0</version>
+  <version>0.5.1</version>
   <build>
       <plugins>
           <plugin>
@@ -29,11 +29,23 @@
            <version>1.10-R0.1-SNAPSHOT</version>
            <scope>provided</scope>
         </dependency>
+        <dependency>
+           <groupId>org.spigotmc</groupId>
+           <artifactId>spigot-api</artifactId>
+           <version>1.9.4-R0.1-SNAPSHOT</version>
+           <scope>provided</scope>
+        </dependency>
         <!--Bukkit API-->
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>1.10-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.9.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
