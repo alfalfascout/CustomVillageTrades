@@ -9,6 +9,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+// helper class for loading and saving config files 
 public class FileAndConfig {
     public File file;
     public Reader reader;
@@ -61,6 +62,7 @@ public class FileAndConfig {
         }
     }
     
+    // either load it from the file or the reader, depending which exists
     public void load() {
         if (!this.file.equals(null)) {
             try {

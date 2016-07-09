@@ -46,6 +46,7 @@ public class LeveledEnchantment extends EnchantmentWrapper {
         }
     }
     
+    // get one (weighted) random leveled enchantment from a list
     public static LeveledEnchantment getRandomLeveledEnchant(
             CustomVillageTrades instance, 
             List<LeveledEnchantment> list, Random rand) {

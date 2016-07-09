@@ -51,7 +51,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return CustomVillageTrades.villagers;
     }
     
-    // gets either the vanilla trade list or the user's trade list
+    // gets the specified trade list or the default config if not found
     public FileAndConfig getTree(String file) {
         
         if (trees.containsKey(file)) {
@@ -98,12 +98,14 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         loadTreesByWorld();
     }
     
+    // add all the worlds it can find to the config world tree
     public void populateWorlds() {
         List<World> allWorlds = this.getServer().getWorlds();
         for (World world : allWorlds) {
-            if (!getConfig().contains("worlds." + world.getName(), true)) {
-                getConfig().createSection("worlds." + world.getName());
-                getConfig().set("worlds." + world.getName(), "config.yml");
+            String worldPath = "worlds." + world.getName();
+            if (!getConfig().contains(worldPath, true)) {
+                getConfig().createSection(worldPath);
+                getConfig().set(worldPath, "config.yml");
             }
         }
     }
@@ -137,12 +139,11 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
     }
     
-    
     public void getDefaultConfigs() {
         populateTree(getTree("config"));
     }
     
-    // make sure all villager types, currency, and allow bool are in the tree
+    // make sure all villager types, currency, and vanilla bool are in the tree
     public void populateTree(FileAndConfig tree) {
         List<String> villagerList = Arrays.asList("librarian", "cleric",
                 "farmer", "fletcher", "fisherman", "shepherd", "butcher",
@@ -170,7 +171,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         tree.save();
     }
     
-    // get the currency
+    // get the currency of the given world configuration
     public Material getCurrency(FileConfiguration f) {
         Material currency = Material.matchMaterial(
                 f.getString("currency"));
@@ -189,7 +190,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return currency;
     }
     
-    // get whether vanilla trades are allowed
+    // get whether vanilla trades are allowed in the current world config
     public boolean getAllowVanilla(FileConfiguration f) {
         boolean vanillaTrades = false;
         
@@ -209,36 +210,43 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     @EventHandler
     public void onTradeAcquire(VillagerAcquireTradeEvent e) {
         Villager villager = e.getEntity();
-        String location = villager.getEyeLocation().getWorld().getName();
+        String world = villager.getEyeLocation().getWorld().getName();
         
-        if (trees.containsKey(location)) {
-            FileConfiguration file = getTree(location).conf;
+        if (trees.containsKey(world)) {
+            FileConfiguration file = getTree(world).conf;
             handleTrade(file, e);
         }
-        else if (!getConfig().contains("worlds")) {
+        else if (!getConfig().contains("worlds")) { // for legacy configs??
             handleTrade(getConfig(), e);
         }
-        else if (getConfig().getString("worlds." + location).equals("none")) {
+        else if (getConfig().getString("worlds." + world).equals("none")) {
             e.setCancelled(true);
         }
     }
-        
+    
+    // get trades the villager should have based on the trade it's acquiring
     public void handleTrade(FileConfiguration f, VillagerAcquireTradeEvent e) {
         Villager villager = e.getEntity();
         MerchantRecipe recipe = e.getRecipe();
-        CareerTier trade = new CareerTier(this);
-        CareerTier.setCareerTier(trade, villager, recipe);
         
+        // hacky way to get the villager's career until spigot adds that in
+        CareerTier trade = new CareerTier(this);
+        trade.setCareerTier(trade, villager, recipe);
+        
+        // get all the trades appropriate for villager's career and tier
         if (trade.tier > 0) {
+            // specific trades listed in world's trade file
             String path = trade.career + ".tier" + 
                         Integer.toString(trade.tier);
             List<MerchantRecipe> newTrades = getTradesInTier(f, path);
+            
+            // pseudo vanilla trades if career set to "default"
             if (f.getString(trade.career).equals("default") && 
                     !f.getBoolean("allow_vanilla_trades")) {
-                
                 List<MerchantRecipe> vanillaTrades = getTradesInTier(
                         getTree("vanilla").conf, path);
                 
+                // correct the currency of the vanilla trades
                 if (!getCurrency(f).equals(Material.EMERALD)) {
                     for (MerchantRecipe vanillaTrade : vanillaTrades) {
                         MerchantRecipe newVanillaTrade = 
@@ -250,15 +258,18 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 newTrades.addAll(vanillaTrades);
             }
             
+            // trades given to all villagers of this tier
             path = "all_villagers.tier" + Integer.toString(trade.tier);
             if (f.contains(path)) {
                 newTrades.addAll(getTradesInTier(f, path));
             }
             
+            // add all the above trades to the villager
             for (MerchantRecipe newTrade : newTrades) {
                 addRecipe(villager, newTrade);
             }
         }
+        
         if (!getAllowVanilla(f)) {
             e.setCancelled(true);
         }
@@ -267,16 +278,20 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             e.setRecipe(recipe);
         }
     }
-        
+    
+    // add one recipe to the end of the villager's recipe list
     public void addRecipe(Villager villager, MerchantRecipe recipe) {
         List<MerchantRecipe> newRecipes = new ArrayList<MerchantRecipe>();
+        
         for (int i = 0; i < villager.getRecipeCount(); i++) {
             newRecipes.add(villager.getRecipe(i));
         }
+        
         newRecipes.add(recipe);
         villager.setRecipes(newRecipes);
     }
     
+    // get all the trades in the given path (tier) of the given world file
     public List<MerchantRecipe> getTradesInTier(
             FileConfiguration f, String path) {
         List<MerchantRecipe> list = new ArrayList<MerchantRecipe>();
@@ -307,7 +322,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 if (f.getString(
                         tradePath + ".ingredient1").equals("auto")) {
                     ingredients.add(
-                            EnchantHelper.appraiseEnchantedBook(this, f, result));
+                            EnchantHelper.appraiseEnchantedBook(
+                                    this, f, result));
                 }
                 
                 else {
@@ -338,6 +354,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return list;
     }
     
+    // build individual ItemStack at the given path of the given world file
     public ItemStack getItemInTrade(FileConfiguration f, String path) {
         String materialName = f.getString(path + ".material");
         Material itemType;
@@ -546,6 +563,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return item;
     }
     
+    // given a recipe where the currency is emeralds,
+    // change it to the currency listed in the config for that world
     public MerchantRecipe changeVanillaCurrency(FileConfiguration f,
             MerchantRecipe recipe) {
         ItemStack result = recipe.getResult();

@@ -91,23 +91,24 @@ public class EnchantHelper {
         plugin = instance;
     }
     
-    // Lifted from mc because I am not writing this out by hand
+    // return a number not bigger than max or smaller that min, initially num
     public static int clampInt(int num, int min, int max) {
         return num < min ? min : (num > max ? max : num);
     }
     
+    // get one enchantment type that could be applied to a given item
     public static Enchantment getRandomEnchantment(
             CustomVillageTrades instance, ItemStack item) {
-        List<Enchantment> list = new ArrayList<Enchantment>();
+        List<Enchantment> possibilities = new ArrayList<Enchantment>();
         
         for (Enchantment enchantment : Enchantment.values()) {
             if (enchantment.canEnchantItem(item) || 
                     item.getType().equals(Material.ENCHANTED_BOOK)) {
-                list.add(enchantment);
+                possibilities.add(enchantment);
             }
         }
         
-        return list.get(rand.nextInt(list.size()));
+        return possibilities.get(rand.nextInt(possibilities.size()));
     }
     
     // Returns an enchanted book roughly equivalent to a vanilla librarian's
@@ -131,23 +132,24 @@ public class EnchantHelper {
     }
         
     
-    // Returns a random enchantment roughly equivalent to mc's random enchants
+    // Enchants the item randomly, roughly equivalent to mc's random enchants
     public static ItemStack randomlyEnchant(CustomVillageTrades instance,
             ItemStack item, int level, boolean allowTreasure) {
+        
         if (enchantableItems.contains(item.getType())) {
             boolean isBook = item.getType() == Material.BOOK;
-            List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
+            List<LeveledEnchantment> enchants = new ArrayList<LeveledEnchantment>();
 
             if (isBook) {
                 item.setType(Material.ENCHANTED_BOOK);
             }
             
-            while(list.size() < 1) {
-                list = buildLeveledEnchantmentList(
+            while(enchants.size() < 1) {
+                enchants = buildLeveledEnchantmentList(
                         instance, item, level, allowTreasure);
             }
             
-            for (LeveledEnchantment enchantment : list) {
+            for (LeveledEnchantment enchantment : enchants) {
                 item = applyEnchantment(instance, item, enchantment);
             }
         }
@@ -155,11 +157,11 @@ public class EnchantHelper {
         return item;
     }
     
-    // Makes a list of enchantments an item might have
+    // Builds a list of semi-random enchantments for given item
     public static List<LeveledEnchantment> buildLeveledEnchantmentList(
             CustomVillageTrades instance, ItemStack item,
             int level, boolean allowTreasure) {
-        List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
+        List<LeveledEnchantment> enchants = new ArrayList<LeveledEnchantment>();
         int enchantability;
         
         if (enchantability_25.contains(item.getType())) {
@@ -192,71 +194,79 @@ public class EnchantHelper {
         
         level = level + 1 + rand.nextInt(enchantability / 4 + 1) + 
                 rand.nextInt(enchantability / 4 + 1);
-        float f = (rand.nextFloat() + rand.nextFloat() - 1.0F) * 0.15F;
-        level = clampInt(Math.round((float)level + (float)level * f),
+        float margin = (rand.nextFloat() + rand.nextFloat() - 1.0F) * 0.15F;
+        level = clampInt(Math.round((float)level + (float)level * margin),
                 1, Integer.MAX_VALUE);
-        List<LeveledEnchantment> list1 = getLeveledEnchantments(instance, item,
+        
+        List<LeveledEnchantment> possibilities = getLeveledEnchantments(instance, item,
                 level, allowTreasure);
         
-        if (!list1.isEmpty()) {
-            list.add(LeveledEnchantment.getRandomLeveledEnchant(
-                    instance, list1, rand));
+        if (!possibilities.isEmpty()) {
+            enchants.add(LeveledEnchantment.getRandomLeveledEnchant(
+                    instance, possibilities, rand));
             
             while (rand.nextInt(50) <= level) {
-                list1 = removeIncompatibleEnchants(list1, list);
+                possibilities = removeIncompatibleEnchants(
+                        possibilities, enchants);
                 
-                if (list1.isEmpty()) {
+                if (possibilities.isEmpty()) {
                     break;
                 }
                 
-                list.add(LeveledEnchantment.getRandomLeveledEnchant(
-                        instance, list1, rand));
+                enchants.add(LeveledEnchantment.getRandomLeveledEnchant(
+                        instance, possibilities, rand));
                 level /= 2;
             }
         }
         
-        return list;
+        return enchants;
     }
     
     // Get all enchantments that might apply to an item
     public static List<LeveledEnchantment> getLeveledEnchantments(
             CustomVillageTrades instance, ItemStack item,
             int level, boolean allowTreasure) {
-        List<LeveledEnchantment> list = new ArrayList<LeveledEnchantment>();
+        List<LeveledEnchantment> enchants = new ArrayList<LeveledEnchantment>();
         boolean isBook = item.getType() == Material.ENCHANTED_BOOK;
         
         for (Enchantment enchantment : Enchantment.values()) {
+            
             if ((!treasure.contains(enchantment) || allowTreasure) && 
                     (enchantment.canEnchantItem(item) || isBook)) {
+                
                 for (int i = enchantment.getMaxLevel(); 
                         i > enchantment.getStartLevel() - 1; --i) {
+                    
                     if (level >= (1 + i * 10) && level <= ((1 + i * 10) + 5)) {
-                        list.add(new LeveledEnchantment(instance,
+                        
+                        enchants.add(new LeveledEnchantment(instance,
                                 enchantment.hashCode(), i));
                     }
                 }
             }
         }
         
-        return list;
+        return enchants;
     }
     
     // Remove enchantments from the pool of possibilities based on selected
     public static List<LeveledEnchantment> removeIncompatibleEnchants(
-            List<LeveledEnchantment> pool, List<LeveledEnchantment> list) {
+            List<LeveledEnchantment> pool, List<LeveledEnchantment> enchants) {
         List<LeveledEnchantment> newPool = new ArrayList<LeveledEnchantment>();
         newPool.addAll(pool);
+        
         for (LeveledEnchantment possibility : pool) {
-            for (LeveledEnchantment selected : list) {
+            for (LeveledEnchantment selected : enchants) {
                 if (possibility.conflictsWith(selected)) {
                     newPool.remove(possibility);
                 }
             }
         }
+        
         return newPool;
     }
     
-    // Either applies or stores enchantments as appropriate
+    // Either applies or stores enchantments as appropriate for item type
     public static ItemStack applyEnchantment(CustomVillageTrades instance,
             ItemStack item, LeveledEnchantment enchantment) {
         if (item.getType().equals(Material.ENCHANTED_BOOK)) {

@@ -21,7 +21,7 @@ public class CareerTier {
     }
     
     // get villager's career and trade tier based on current trade
-    public static CareerTier setCareerTier(CareerTier careerTier,
+    public CareerTier setCareerTier(CareerTier careerTier,
             Villager villager, MerchantRecipe recipe) {
         ItemStack result = recipe.getResult();
         List<ItemStack> ingredients = recipe.getIngredients();
