@@ -231,7 +231,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
         // hacky way to get the villager's career until spigot adds that in
         CareerTier trade = new CareerTier(this);
-        trade.setCareerTier(trade, villager, recipe);
+        trade.setCareerTier(villager, recipe);
         
         // get all the trades appropriate for villager's career and tier
         if (trade.tier > 0) {

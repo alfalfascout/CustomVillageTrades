@@ -21,170 +21,170 @@ public class CareerTier {
     }
     
     // get villager's career and trade tier based on current trade
-    public CareerTier setCareerTier(CareerTier careerTier,
-            Villager villager, MerchantRecipe recipe) {
+    public CareerTier setCareerTier(Villager villager, 
+            MerchantRecipe recipe) {
         ItemStack result = recipe.getResult();
         List<ItemStack> ingredients = recipe.getIngredients();
         
         // farmer
         if (result.getType().equals(Material.BREAD)) {
-            careerTier.career = "farmer";
-            careerTier.tier = 1;
+            this.career = "farmer";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.PUMPKIN_PIE)) {
-            careerTier.career = "farmer";
-            careerTier.tier = 2;
+            this.career = "farmer";
+            this.tier = 2;
         }
         else if (result.getType().equals(Material.APPLE)) {
-            careerTier.career = "farmer";
-            careerTier.tier = 3;
+            this.career = "farmer";
+            this.tier = 3;
         }
         else if (result.getType().equals(Material.COOKIE)) {
-            careerTier.career = "farmer";
-            careerTier.tier = 4;
+            this.career = "farmer";
+            this.tier = 4;
         } // fisherman
         else if (result.getType().equals(Material.COOKED_FISH)) {
-            careerTier.career = "fisherman";
-            careerTier.tier = 1;
+            this.career = "fisherman";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.FISHING_ROD)) {
-            careerTier.career = "fisherman";
-            careerTier.tier = 2;
+            this.career = "fisherman";
+            this.tier = 2;
         } // fletcher
         else if (result.getType().equals(Material.ARROW)) {
-            careerTier.career = "fletcher";
-            careerTier.tier = 1;
+            this.career = "fletcher";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.BOW)) {
-            careerTier.career = "fletcher";
-            careerTier.tier = 2;
+            this.career = "fletcher";
+            this.tier = 2;
         } // shepherd
         else if (result.getType().equals(Material.SHEARS)) {
-            careerTier.career = "shepherd";
-            careerTier.tier = 1;
+            this.career = "shepherd";
+            this.tier = 1;
         }
         else if (result.equals(new ItemStack(Material.WOOL, 1, (short)1))) {
-            careerTier.career = "shepherd";
-            careerTier.tier = 2;
+            this.career = "shepherd";
+            this.tier = 2;
         } // librarian
         else if (ingredients.get(0).getType().equals(Material.PAPER)) {
-            careerTier.career = "librarian";
-            careerTier.tier = 1;
+            this.career = "librarian";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.BOOKSHELF)) {
-            careerTier.career = "librarian";
-            careerTier.tier = 2;
+            this.career = "librarian";
+            this.tier = 2;
         }
         else if (result.getType().equals(Material.GLASS)) {
-            careerTier.career = "librarian";
-            careerTier.tier = 3;
+            this.career = "librarian";
+            this.tier = 3;
         }
         else if (result.getType().equals(Material.NAME_TAG)) {
-            careerTier.career = "librarian";
-            careerTier.tier = 6;
+            this.career = "librarian";
+            this.tier = 6;
         }
         else if (result.getType().equals(Material.ENCHANTED_BOOK)) {
-            careerTier.career = "librarian";
-            careerTier.tier = 0;
+            this.career = "librarian";
+            this.tier = 0;
         }// butcher
         else if (ingredients.get(0).getType().equals(Material.RAW_CHICKEN)) {
-            careerTier.career = "butcher";
-            careerTier.tier = 1;
+            this.career = "butcher";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.COOKED_CHICKEN)) {
-            careerTier.career = "butcher";
-            careerTier.tier = 2;
+            this.career = "butcher";
+            this.tier = 2;
         }// leatherworker
         else if (result.getType().equals(Material.LEATHER_LEGGINGS)) {
-            careerTier.career = "leatherworker";
-            careerTier.tier = 1;
+            this.career = "leatherworker";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.LEATHER_CHESTPLATE)) {
-            careerTier.career = "leatherworker";
-            careerTier.tier = 2;
+            this.career = "leatherworker";
+            this.tier = 2;
         }
         else if (result.getType().equals(Material.SADDLE)) {
-            careerTier.career = "leatherworker";
-            careerTier.tier = 3;
+            this.career = "leatherworker";
+            this.tier = 3;
         }// armorer
         else if (result.getType().equals(Material.IRON_HELMET)) {
-            careerTier.career = "armorer";
-            careerTier.tier = 1;
+            this.career = "armorer";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.IRON_CHESTPLATE)) {
-            careerTier.career = "armorer";
-            careerTier.tier = 2;
+            this.career = "armorer";
+            this.tier = 2;
         }
         else if (result.getType().equals(Material.DIAMOND_CHESTPLATE)) {
-            careerTier.career = "armorer";
-            careerTier.tier = 3;
+            this.career = "armorer";
+            this.tier = 3;
         }
         else if (result.getType().equals(Material.CHAINMAIL_CHESTPLATE)) {
-            careerTier.career = "armorer";
-            careerTier.tier = 4;
+            this.career = "armorer";
+            this.tier = 4;
         }// weaponsmith
         else if (result.getType().equals(Material.IRON_AXE)) {
-            careerTier.career = "weaponsmith";
-            careerTier.tier = 1;
+            this.career = "weaponsmith";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.IRON_SWORD)) {
-            careerTier.career = "weaponsmith";
-            careerTier.tier = 2;
+            this.career = "weaponsmith";
+            this.tier = 2;
         }
         else if (result.getType().equals(Material.DIAMOND_SWORD)) {
-            careerTier.career = "weaponsmith";
-            careerTier.tier = 3;
+            this.career = "weaponsmith";
+            this.tier = 3;
         }// toolsmith
         else if (result.getType().equals(Material.IRON_SPADE)) {
-            careerTier.career = "toolsmith";
-            careerTier.tier = 1;
+            this.career = "toolsmith";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.IRON_PICKAXE)) {
-            careerTier.career = "toolsmith";
-            careerTier.tier = 2;
+            this.career = "toolsmith";
+            this.tier = 2;
         }
         else if (result.getType().equals(Material.DIAMOND_PICKAXE)) {
-            careerTier.career = "toolsmith";
-            careerTier.tier = 3;
+            this.career = "toolsmith";
+            this.tier = 3;
         }// cleric
         else if (ingredients.get(0).getType().equals(Material.ROTTEN_FLESH)) {
-            careerTier.career = "cleric";
-            careerTier.tier = 1;
+            this.career = "cleric";
+            this.tier = 1;
         }
         else if (result.getType().equals(Material.REDSTONE)) {
-            careerTier.career = "cleric";
-            careerTier.tier = 2;
+            this.career = "cleric";
+            this.tier = 2;
         }
         else if (result.getType().equals(Material.GLOWSTONE)) {
-            careerTier.career = "cleric";
-            careerTier.tier = 3;
+            this.career = "cleric";
+            this.tier = 3;
         }
         else if (result.getType().equals(Material.EXP_BOTTLE)) {
-            careerTier.career = "cleric";
-            careerTier.tier = 4;
+            this.career = "cleric";
+            this.tier = 4;
         }
         
         
-        if (careerTier.career == "librarian" && careerTier.tier == 0) {
-            careerTier.tier = getLastTier(careerTier, villager, recipe);
-            if (careerTier.tier > 1) {
-                careerTier.tier++;
+        if (this.career == "librarian" && this.tier == 0) {
+            this.tier = this.getLastTier(villager, recipe);
+            if (this.tier > 1) {
+                this.tier++;
             }
             else {
-                careerTier.tier = 0;
+                this.tier = 0;
             }
         }
         
-        if (careerTier.tier > 0) {
-            saveVillager(careerTier, villager);
+        if (this.tier > 0) {
+            saveVillager(this, villager);
         }
         
-        return careerTier;
+        return this;
     }
     
     //figure out what tier a librarian is in
-    public static int getLastTier(CareerTier careerTier,
-            Villager villager, MerchantRecipe recipe) {
+    public int getLastTier(Villager villager, 
+            MerchantRecipe recipe) {
         int last = 0;
         
         //check the librarian file
