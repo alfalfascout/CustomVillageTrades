@@ -265,9 +265,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             }
             
             // add all the above trades to the villager
-            for (MerchantRecipe newTrade : newTrades) {
-                addRecipe(villager, newTrade);
-            }
+            addRecipes(villager, newTrades);
         }
         
         if (!getAllowVanilla(f)) {
@@ -279,15 +277,13 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
     }
     
-    // add one recipe to the end of the villager's recipe list
-    public void addRecipe(Villager villager, MerchantRecipe recipe) {
+    // add recipes to the end of the villager's recipe list
+    public void addRecipes(Villager villager, List<MerchantRecipe> recipes) {
         List<MerchantRecipe> newRecipes = new ArrayList<MerchantRecipe>();
         
-        for (int i = 0; i < villager.getRecipeCount(); i++) {
-            newRecipes.add(villager.getRecipe(i));
-        }
+        newRecipes.addAll(villager.getRecipes());
+        newRecipes.addAll(recipes);
         
-        newRecipes.add(recipe);
         villager.setRecipes(newRecipes);
     }
     
