@@ -20,6 +20,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -208,6 +209,46 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     
     @EventHandler
+    public void onTradeReplenish(VillagerReplenishTradeEvent e) {
+        Villager villager = e.getEntity();
+        String villagerId = "id" + villager.getUniqueId().toString();
+        long lastNew = villagers.getLong(villagerId + ".lastnew");
+        
+        if (villagers.getBoolean(villagerId + ".lastvanilla")) {
+            if (lastNew + (long)2000 < System.currentTimeMillis()) {
+                String world = villager.getEyeLocation().getWorld().getName();
+                FileConfiguration file;
+                if (trees.containsKey(world)) {
+                    file = getTree(world).conf;
+                }
+                else {
+                    return;
+                }
+                
+                CareerTier career = new CareerTier(this);
+                career.getLastCareerTier(villager);
+                career.tier += 1;
+                
+                List<MerchantRecipe> newTrades = 
+                        new ArrayList<MerchantRecipe>();
+                
+                
+                String tradePath = career.career + ".tier" + career.tier;
+                newTrades = getTradesInTier(file, tradePath);
+                tradePath = "all_villagers.tier" + career.tier;
+                newTrades.addAll(getTradesInTier(file, tradePath));
+                
+                if (newTrades.size() > 0) {
+                    for (MerchantRecipe newTrade : newTrades) {
+                        addRecipe(villager, newTrade);
+                    }
+                }
+            }
+        }
+    }
+    
+    
+    @EventHandler
     public void onTradeAcquire(VillagerAcquireTradeEvent e) {
         Villager villager = e.getEntity();
         String world = villager.getEyeLocation().getWorld().getName();
@@ -277,6 +318,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             recipe = changeVanillaCurrency(f, recipe);
             e.setRecipe(recipe);
         }
+        
+        String villagerId = "id" + Integer.toString(villager.getEntityId());
+        villagers.set(villagerId + ".lastnew", System.currentTimeMillis());
     }
     
     // add one recipe to the end of the villager's recipe list

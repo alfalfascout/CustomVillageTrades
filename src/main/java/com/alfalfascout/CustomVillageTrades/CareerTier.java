@@ -13,10 +13,12 @@ public class CareerTier {
     static CustomVillageTrades plugin;
     public String career;
     public int tier;
+    public boolean lastVanilla;
     
     public CareerTier(CustomVillageTrades instance) {
         this.career = "villager";
         this.tier = 0;
+        this.lastVanilla = false;
         plugin = instance;
     }
     
@@ -42,6 +44,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.COOKIE)) {
             this.career = "farmer";
             this.tier = 4;
+            this.lastVanilla = true;
         } // fisherman
         else if (result.getType().equals(Material.COOKED_FISH)) {
             this.career = "fisherman";
@@ -50,6 +53,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.FISHING_ROD)) {
             this.career = "fisherman";
             this.tier = 2;
+            this.lastVanilla = true;
         } // fletcher
         else if (result.getType().equals(Material.ARROW)) {
             this.career = "fletcher";
@@ -58,6 +62,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.BOW)) {
             this.career = "fletcher";
             this.tier = 2;
+            this.lastVanilla = true;
         } // shepherd
         else if (result.getType().equals(Material.SHEARS)) {
             this.career = "shepherd";
@@ -66,6 +71,7 @@ public class CareerTier {
         else if (result.equals(new ItemStack(Material.WOOL, 1, (short)1))) {
             this.career = "shepherd";
             this.tier = 2;
+            this.lastVanilla = true;
         } // librarian
         else if (ingredients.get(0).getType().equals(Material.PAPER)) {
             this.career = "librarian";
@@ -82,6 +88,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.NAME_TAG)) {
             this.career = "librarian";
             this.tier = 6;
+            this.lastVanilla = true;
         }
         else if (result.getType().equals(Material.ENCHANTED_BOOK)) {
             this.career = "librarian";
@@ -94,6 +101,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.COOKED_CHICKEN)) {
             this.career = "butcher";
             this.tier = 2;
+            this.lastVanilla = true;
         }// leatherworker
         else if (result.getType().equals(Material.LEATHER_LEGGINGS)) {
             this.career = "leatherworker";
@@ -106,6 +114,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.SADDLE)) {
             this.career = "leatherworker";
             this.tier = 3;
+            this.lastVanilla = true;
         }// armorer
         else if (result.getType().equals(Material.IRON_HELMET)) {
             this.career = "armorer";
@@ -122,6 +131,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.CHAINMAIL_CHESTPLATE)) {
             this.career = "armorer";
             this.tier = 4;
+            this.lastVanilla = true;
         }// weaponsmith
         else if (result.getType().equals(Material.IRON_AXE)) {
             this.career = "weaponsmith";
@@ -134,6 +144,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.DIAMOND_SWORD)) {
             this.career = "weaponsmith";
             this.tier = 3;
+            this.lastVanilla = true;
         }// toolsmith
         else if (result.getType().equals(Material.IRON_SPADE)) {
             this.career = "toolsmith";
@@ -146,6 +157,7 @@ public class CareerTier {
         else if (result.getType().equals(Material.DIAMOND_PICKAXE)) {
             this.career = "toolsmith";
             this.tier = 3;
+            this.lastVanilla = true;
         }// cleric
         else if (ingredients.get(0).getType().equals(Material.ROTTEN_FLESH)) {
             this.career = "cleric";
@@ -162,11 +174,12 @@ public class CareerTier {
         else if (result.getType().equals(Material.EXP_BOTTLE)) {
             this.career = "cleric";
             this.tier = 4;
+            this.lastVanilla = true;
         }
         
         
         if (this.career == "librarian" && this.tier == 0) {
-            this.tier = this.getLastTier(villager, recipe);
+            this.tier = this.getLastLibrarianTier(villager, recipe);
             if (this.tier > 1) {
                 this.tier++;
             }
@@ -183,14 +196,14 @@ public class CareerTier {
     }
     
     //figure out what tier a librarian is in
-    public int getLastTier(Villager villager, 
+    public int getLastLibrarianTier(Villager villager, 
             MerchantRecipe recipe) {
         int last = 0;
         
         //check the librarian file
-        String villager_id = "id" + Integer.toString(villager.getEntityId());
-        if (plugin.getVillagers().contains(villager_id)) {
-            last = plugin.getVillagers().getInt(villager_id);
+        String villagerId = "id" + Integer.toString(villager.getEntityId());
+        if (plugin.getVillagers().contains(villagerId)) {
+            last = plugin.getVillagers().getInt(villagerId);
         }
         //check librarian tier list against their trade list
         else if (plugin.getConfig().contains("librarian")) {
@@ -225,12 +238,24 @@ public class CareerTier {
         return last;
     }
     
+    public void getLastCareerTier(Villager villager) {
+        String villagerId = "id" + villager.getUniqueId().toString();
+        
+        this.career = plugin.getVillagers().getString(villagerId + ".career");
+        this.tier = plugin.getVillagers().getInt(villagerId + ".tier");
+        this.lastVanilla = plugin.getVillagers().getBoolean(
+                villagerId + ".lastvanilla");
+    }
+    
     public static void saveVillager(CareerTier careerTier, Villager villager) {
-        String villager_id = "id" + Integer.toString(villager.getEntityId());
-        if (!plugin.getVillagers().contains(villager_id)) {
-            plugin.getVillagers().createSection(villager_id);
+        String villagerId = "id" + villager.getUniqueId().toString();
+        if (!plugin.getVillagers().contains(villagerId)) {
+            plugin.getVillagers().createSection(villagerId);
         }
         
-        plugin.getVillagers().set(villager_id, careerTier.tier);
+        plugin.getVillagers().set(villagerId + ".tier", careerTier.tier);
+        plugin.getVillagers().set(villagerId + ".career", careerTier.career);
+        plugin.getVillagers().set(
+                villagerId + ".lastvanilla", careerTier.lastVanilla);
     }
 }
