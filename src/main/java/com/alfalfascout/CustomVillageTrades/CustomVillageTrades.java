@@ -16,6 +16,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,6 +24,7 @@ import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.SpawnEgg;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CustomVillageTrades extends JavaPlugin implements Listener {
@@ -370,6 +372,26 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
         
         ItemStack item = new ItemStack(itemType);
+        
+        // handle spawn eggs
+        if (itemType.equals(Material.MONSTER_EGG)) {
+            EntityType spawnEggType = EntityType.PIG; 
+            if (f.contains(path + ".spawns")) {
+                try {
+                    spawnEggType = EntityType.valueOf(
+                            f.getString(path + ".spawns").toUpperCase());
+                }
+                catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                    getLogger().info(f.getString(path + ".spawns") + 
+                            " is not a valid entity type for spawn eggs.");
+                    spawnEggType = EntityType.PIG; 
+                }
+            }
+            
+            SpawnEgg spawnEgg = new SpawnEgg(spawnEggType);
+            item = spawnEgg.toItemStack(1);
+        }
         
         // get how many of the item there are
         if (f.contains(path + ".min") &&
