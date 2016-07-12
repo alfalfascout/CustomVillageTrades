@@ -24,8 +24,11 @@ import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.SpawnEgg;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionType;
 
 public class CustomVillageTrades extends JavaPlugin implements Listener {
     static Random rand = new Random();
@@ -383,7 +386,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 }
                 catch (IllegalArgumentException e) {
                     e.printStackTrace();
-                    getLogger().info(f.getString(path + ".spawns") + 
+                    getLogger().warning(f.getString(path + ".spawns") + 
                             " is not a valid entity type for spawn eggs.");
                     spawnEggType = EntityType.PIG; 
                 }
@@ -391,6 +394,60 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             
             SpawnEgg spawnEgg = new SpawnEgg(spawnEggType);
             item = spawnEgg.toItemStack(1);
+        }
+        
+        // handle potions
+        if (itemType.equals(Material.POTION)) {
+            PotionMeta meta = (PotionMeta) item.getItemMeta();
+            PotionType potionType = PotionType.WATER;
+            boolean potionExtended = false;
+            boolean potionUpgraded = false;
+            
+            if (f.contains(path + ".potion.type")) {
+                try {
+                    potionType = PotionType.valueOf(
+                            f.getString(path + ".potion.type").toUpperCase());
+                }
+                catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                    getLogger().warning(f.getString(path + ".potion.type") + 
+                            " is not a valid potion type.");
+                }
+            }
+            
+            if (f.contains(path + ".potion.extended") && 
+                    potionType.isExtendable()) {
+                try {
+                    potionExtended = f.getBoolean(path + ".potion.extended");
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    getLogger().warning("'extended' should be true or false.");
+                }
+            }
+            
+            if (f.contains(path + ".potion.upgraded") &&
+                    potionType.isUpgradeable()) {
+                try {
+                    potionUpgraded = f.getBoolean(path + ".potion.upgraded");
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    getLogger().warning("'upgraded' should be true or false.");
+                }
+            }
+            
+            if ((potionExtended && potionUpgraded)) {
+                getLogger().warning(
+                        "Potion cannot be both extended and upgraded.");
+                potionExtended = false;
+                potionUpgraded = false;
+            }
+            
+            PotionData potionData = 
+                    new PotionData(potionType, potionExtended, potionUpgraded);
+            meta.setBasePotionData(potionData);
+            item.setItemMeta(meta);
         }
         
         // get how many of the item there are
