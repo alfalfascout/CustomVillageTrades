@@ -397,7 +397,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
         
         // handle potions
-        if (itemType.equals(Material.POTION)) {
+        if (itemType.equals(Material.POTION) || 
+                itemType.equals(Material.SPLASH_POTION)) {
             PotionMeta meta = (PotionMeta) item.getItemMeta();
             PotionType potionType = PotionType.WATER;
             boolean potionExtended = false;
