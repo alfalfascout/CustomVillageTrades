@@ -188,14 +188,14 @@ public class CareerTier {
         int last = 0;
         
         //check the librarian file
-        String villager_id = "id" + Integer.toString(villager.getEntityId());
-        if (plugin.getVillagers().contains(villager_id)) {
-            last = plugin.getVillagers().getInt(villager_id);
+        String villagerId = "id" + Integer.toString(villager.getEntityId());
+        if (plugin.getVillagers().contains(villagerId)) {
+            last = plugin.getVillagers().getInt(villagerId);
         }
         //check librarian tier list against their trade list
         else if (plugin.getConfig().contains("librarian")) {
             List<Integer> tradesByTier = new ArrayList<Integer>();
-            int currenttrades = villager.getRecipeCount();
+            int currentTrades = villager.getRecipeCount();
             
             if (plugin.getConfig().getString("librarian") != "default") {
                 for (String tier : plugin.getConfig().getStringList(
@@ -213,7 +213,7 @@ public class CareerTier {
                 }
             }
             for (int trades : tradesByTier) {
-                if (currenttrades < trades) {
+                if (currentTrades < trades) {
                     last = tradesByTier.indexOf(trades);
                 }
             }
@@ -226,11 +226,11 @@ public class CareerTier {
     }
     
     public static void saveVillager(CareerTier careerTier, Villager villager) {
-        String villager_id = "id" + Integer.toString(villager.getEntityId());
-        if (!plugin.getVillagers().contains(villager_id)) {
-            plugin.getVillagers().createSection(villager_id);
+        String villagerId = "id" + Integer.toString(villager.getEntityId());
+        if (!plugin.getVillagers().contains(villagerId)) {
+            plugin.getVillagers().createSection(villagerId);
         }
         
-        plugin.getVillagers().set(villager_id, careerTier.tier);
+        plugin.getVillagers().set(villagerId, careerTier.tier);
     }
 }

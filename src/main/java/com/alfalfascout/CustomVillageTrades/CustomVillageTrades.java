@@ -18,6 +18,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.Villager.Profession;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
@@ -670,5 +671,67 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         recipe.setIngredients(ingredients);
         
         return recipe;
+    }
+    
+    // gets every villager and changes their trades to their first tier
+    public void overwriteAllTrades() {
+        List<Villager> allVillagers = getAllVillagers();
+        
+        for (Villager villager : allVillagers) {
+            CareerTier careerTier = new CareerTier(this);
+            careerTier.tier = 1;
+            
+            if (villager.getProfession().equals(Profession.LIBRARIAN)) {
+                careerTier.career = "librarian";
+            }
+            else if (villager.getProfession().equals(Profession.PRIEST)) {
+                careerTier.career = "priest";
+            }
+            CareerTier.saveVillager(careerTier, villager);
+            
+            String world = villager.getEyeLocation().getWorld().toString();
+            FileConfiguration file = getTree(world).conf;
+            
+            List<MerchantRecipe> trades = getTradesInTier(
+                    file, careerTier.career + ".tier1");
+            
+            if ((file.isString(careerTier.career) && 
+                    file.getString(careerTier.career).equals("default")) || 
+                    file.getBoolean("allow_vanilla_trades")) {
+                List<MerchantRecipe> vanillaTrades = getTradesInTier(
+                        getTree("vanilla").conf, careerTier.career + ".tier1");
+                
+                // correct the currency of the vanilla trades
+                if (!getCurrency(file).equals(Material.EMERALD)) {
+                    for (MerchantRecipe vanillaTrade : vanillaTrades) {
+                        MerchantRecipe newVanillaTrade = 
+                                changeVanillaCurrency(file, vanillaTrade);
+                        vanillaTrades.set(vanillaTrades.indexOf(vanillaTrade),
+                                newVanillaTrade);
+                    }
+                }
+                trades.addAll(vanillaTrades);
+            }
+            trades.addAll(getTradesInTier(file, "all_villagers.tier1"));
+            
+            villager.setRecipes(trades);
+            
+            getLogger().info(villager.getUniqueId().toString() + 
+                    "'s trades have been reset.");
+        }
+     }
+    
+    public List<Villager> getAllVillagers() {
+        List<Villager> allVillagers = new ArrayList<Villager>();
+        List<World> worlds = this.getServer().getWorlds();
+        
+        for (World world : worlds) {
+            allVillagers.addAll(world.getEntitiesByClass(Villager.class));
+        }
+        
+        getLogger().info("Found " + 
+                Integer.toString(allVillagers.size()) + " villagers."); 
+        
+        return allVillagers;
     }
 }
