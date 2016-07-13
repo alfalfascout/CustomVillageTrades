@@ -152,6 +152,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         if (!getConfig().contains("overwrite_unknown_villagers", true)) {
             getConfig().set("overwrite_unknown_villagers", false);
         }
+        saveConfig();
     }
     
     // make sure all villager types, currency, and vanilla bool are in the tree
