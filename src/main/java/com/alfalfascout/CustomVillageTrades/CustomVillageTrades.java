@@ -149,7 +149,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     public void getDefaultConfigs() {
         populateTree(getTree("config"));
-        if (!getConfig().contains("overwrite_unknown_villagers")) {
+        if (!getConfig().contains("overwrite_unknown_villagers", true)) {
             getConfig().set("overwrite_unknown_villagers", false);
         }
     }
