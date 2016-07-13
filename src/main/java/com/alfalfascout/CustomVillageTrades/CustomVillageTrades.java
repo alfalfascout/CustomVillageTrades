@@ -18,9 +18,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.Villager.Profession;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
@@ -147,6 +150,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     public void getDefaultConfigs() {
         populateTree(getTree("config"));
+        if (!getConfig().contains("overwrite_unknown_villagers", true)) {
+            getConfig().set("overwrite_unknown_villagers", false);
+        }
+        saveConfig();
     }
     
     // make sure all villager types, currency, and vanilla bool are in the tree
@@ -212,6 +219,34 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return vanillaTrades;
     }
     
+    @EventHandler
+    public void onOpenInventory(InventoryOpenEvent e) {
+        InventoryHolder holder = e.getView().getTopInventory().getHolder();
+        
+        if (holder instanceof Villager) {
+            getLogger().info("A villager holds this inventory.");
+            getLogger().info(((Villager) holder).getUniqueId().toString());
+            CareerTier villagerCareer = new CareerTier(this);
+            
+            if (villagers.contains("id" + Integer.toString(
+                            ((Villager) holder).getEntityId()))) {
+                villagerCareer.loadVillager((Villager) holder);
+                
+            }
+            
+            if (villagers.contains("id" +
+                    ((Villager) holder).getUniqueId().toString())
+                    ) {
+                getLogger().info("Config has this villager.");
+            }
+            else if (getConfig().getBoolean("overwrite_unknown_villagers")) {
+                getLogger().info("Unknown villager. Resetting trades");
+                overwriteTrades((Villager) holder);
+            }
+        }
+        
+    }
+    
     
     @EventHandler
     public void onTradeReplenish(VillagerReplenishTradeEvent e) {
@@ -244,9 +279,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 newTrades.addAll(getTradesInTier(file, tradePath));
                 
                 if (newTrades.size() > 0) {
-                    for (MerchantRecipe newTrade : newTrades) {
-                        addRecipe(villager, newTrade);
-                    }
+                    addRecipes(villager, newTrades);
                 }
             }
         }
@@ -715,4 +748,48 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
         return recipe;
     }
+    
+    // overwrites this villager with their first trade tier
+    public void overwriteTrades(Villager villager) {
+        CareerTier careerTier = new CareerTier(this);
+        careerTier.tier = 1;
+        
+        if (villager.getProfession().equals(Profession.LIBRARIAN)) {
+            careerTier.career = "librarian";
+        }
+        else if (villager.getProfession().equals(Profession.PRIEST)) {
+            careerTier.career = "priest";
+        }
+        CareerTier.saveVillager(careerTier, villager);
+        
+        String world = villager.getEyeLocation().getWorld().toString();
+        FileConfiguration file = getTree(world).conf;
+        
+        List<MerchantRecipe> trades = getTradesInTier(
+                file, careerTier.career + ".tier1");
+        
+        if ((file.isString(careerTier.career) && 
+                file.getString(careerTier.career).equals("default")) || 
+                file.getBoolean("allow_vanilla_trades")) {
+            List<MerchantRecipe> vanillaTrades = getTradesInTier(
+                    getTree("vanilla").conf, careerTier.career + ".tier1");
+            
+            // correct the currency of the vanilla trades
+            if (!getCurrency(file).equals(Material.EMERALD)) {
+                for (MerchantRecipe vanillaTrade : vanillaTrades) {
+                    MerchantRecipe newVanillaTrade = 
+                            changeVanillaCurrency(file, vanillaTrade);
+                    vanillaTrades.set(vanillaTrades.indexOf(vanillaTrade),
+                            newVanillaTrade);
+                }
+            }
+            trades.addAll(vanillaTrades);
+        }
+        trades.addAll(getTradesInTier(file, "all_villagers.tier1"));
+        
+        villager.setRecipes(trades);
+        
+        getLogger().info(villager.getUniqueId().toString() + 
+                "'s trades have been reset.");
+     }
 }
