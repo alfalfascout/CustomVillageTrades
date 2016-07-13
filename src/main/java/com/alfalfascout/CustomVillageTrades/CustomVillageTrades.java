@@ -376,6 +376,32 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
         ItemStack item = new ItemStack(itemType);
         
+        // get item name
+        if (f.contains(path + ".name")) {
+            ItemMeta meta = item.getItemMeta();
+            try {
+                meta.setDisplayName(f.getString(path + ".name"));
+                item.setItemMeta(meta);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        // get item lore
+        if (f.contains(path + ".lore")) {
+            ItemMeta meta = item.getItemMeta();
+            List<String> lore = Arrays.asList(
+                    f.getString(path + ".lore").split(","));
+            try {
+                meta.setLore(lore);
+                item.setItemMeta(meta);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
         // handle spawn eggs
         if (itemType.equals(Material.MONSTER_EGG)) {
             EntityType spawnEggType = EntityType.PIG; 
@@ -483,32 +509,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 e.printStackTrace();
                 getLogger().warning("The value in " + path +
                         ".min or .max should be an integer between 1 and 64.");
-            }
-        }
-        
-        // get item name
-        if (f.contains(path + ".name")) {
-            ItemMeta meta = item.getItemMeta();
-            try {
-                meta.setDisplayName(f.getString(path + ".name"));
-                item.setItemMeta(meta);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        
-        // get item lore
-        if (f.contains(path + ".lore")) {
-            ItemMeta meta = item.getItemMeta();
-            List<String> lore = Arrays.asList(
-                    f.getString(path + ".lore").split(","));
-            try {
-                meta.setLore(lore);
-                item.setItemMeta(meta);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
             }
         }
         
