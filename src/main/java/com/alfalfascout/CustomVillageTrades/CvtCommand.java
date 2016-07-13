@@ -18,7 +18,7 @@ public class CvtCommand implements CommandExecutor {
         if (cmd.getName().equalsIgnoreCase("customvillagetrades")) {
             if (args.length > 0) {
                 if (args[0].equalsIgnoreCase("reload")) {
-                    if (sender.hasPermission("customvillagetraddes.reload")) {
+                    if (sender.hasPermission("customvillagetrades.reload")) {
                         reloadConfigs();
                         sender.sendMessage("Configs and trade lists reloaded.");
                         return true;

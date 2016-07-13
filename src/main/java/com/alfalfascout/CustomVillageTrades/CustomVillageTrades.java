@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,8 +225,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         InventoryHolder holder = e.getView().getTopInventory().getHolder();
         
         if (holder instanceof Villager) {
-            getLogger().info("A villager holds this inventory.");
-            getLogger().info(((Villager) holder).getUniqueId().toString());
             CareerTier villagerCareer = new CareerTier(this);
             
             if (villagers.contains("id" + Integer.toString(
@@ -234,13 +233,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 
             }
             
-            if (villagers.contains("id" +
-                    ((Villager) holder).getUniqueId().toString())
-                    ) {
-                getLogger().info("Config has this villager.");
-            }
-            else if (getConfig().getBoolean("overwrite_unknown_villagers")) {
-                getLogger().info("Unknown villager. Resetting trades");
+            if (getConfig().getBoolean("overwrite_unknown_villagers") && 
+                    !villagers.contains("id" +
+                            ((Villager) holder).getUniqueId().toString())) {
                 overwriteTrades((Villager) holder);
             }
         }
@@ -250,7 +245,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     @EventHandler
     public void onTradeReplenish(VillagerReplenishTradeEvent e) {
-        Villager villager = e.getEntity();
+        final Villager villager = e.getEntity();
         String villagerId = "id" + villager.getUniqueId().toString();
         long lastNew = villagers.getLong(villagerId + ".lastnew");
         
@@ -269,17 +264,28 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 career.getLastCareerTier(villager);
                 career.tier += 1;
                 
-                List<MerchantRecipe> newTrades = 
+                final List<MerchantRecipe> newTrades = 
                         new ArrayList<MerchantRecipe>();
                 
                 
                 String tradePath = career.career + ".tier" + career.tier;
-                newTrades = getTradesInTier(file, tradePath);
+                newTrades.addAll(getTradesInTier(file, tradePath));
                 tradePath = "all_villagers.tier" + career.tier;
                 newTrades.addAll(getTradesInTier(file, tradePath));
                 
                 if (newTrades.size() > 0) {
-                    addRecipes(villager, newTrades);
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(
+                            this, new Runnable() {
+                        public void run() {
+                            try {
+                                addRecipes(villager, newTrades);
+                            }
+                            catch (ConcurrentModificationException e) {
+                                e.printStackTrace();
+                                getLogger().warning("Concurrent modification?");
+                            }
+                        }
+                    }, 5);
                 }
             }
         }
