@@ -15,10 +15,6 @@ permissions:
         description: Gives access to all CustomVillageTrades commands.
         children:
             customvillagetrades.reload: true
-            customvillagetrades.overwrite: true
     customvillagetrades.reload:
         description: Reloads worlds and trade trees from the config files.
-        default: op
-    customvillagetrades.overwrite:
-        description: Overwrites all villagers' trades with what's in the config.
         default: op

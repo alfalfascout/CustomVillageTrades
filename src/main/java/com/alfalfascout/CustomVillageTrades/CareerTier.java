@@ -187,10 +187,15 @@ public class CareerTier {
             MerchantRecipe recipe) {
         int last = 0;
         
-        //check the librarian file
-        String villagerId = "id" + Integer.toString(villager.getEntityId());
+        //check the villager file
+        String villagerId = "id" + villager.getUniqueId().toString();
         if (plugin.getVillagers().contains(villagerId)) {
-            last = plugin.getVillagers().getInt(villagerId);
+            if (plugin.getVillagers().isInt(villagerId)) { //backwards compat
+                last = plugin.getVillagers().getInt(villagerId);
+            }
+            else {
+                last = plugin.getVillagers().getInt(villagerId + ".tier");
+            }
         }
         //check librarian tier list against their trade list
         else if (plugin.getConfig().contains("librarian")) {
@@ -226,11 +231,37 @@ public class CareerTier {
     }
     
     public static void saveVillager(CareerTier careerTier, Villager villager) {
-        String villagerId = "id" + Integer.toString(villager.getEntityId());
+        String villagerId = "id" + villager.getUniqueId().toString();
+        plugin.getLogger().info(villagerId);
         if (!plugin.getVillagers().contains(villagerId)) {
             plugin.getVillagers().createSection(villagerId);
         }
         
-        plugin.getVillagers().set(villagerId, careerTier.tier);
+        plugin.getVillagers().set(villagerId + ".tier", careerTier.tier);
+        plugin.getVillagers().set(villagerId + ".career", careerTier.career);
+    }
+    
+    public void loadVillager(Villager villager) { 
+        String villagerId = "id" + villager.getUniqueId().toString();
+        String legacyVillagerId = "id" + 
+                Integer.toString(villager.getEntityId());
+        
+        if (!(plugin.getVillagers().contains(villagerId) || 
+                plugin.getVillagers().contains(legacyVillagerId))) {
+            saveVillager(this, villager);
+            return;
+        }
+        
+        else if (!plugin.getVillagers().isInt(villagerId)) {
+            this.tier = plugin.getVillagers().getInt(villagerId + ".tier");
+            this.career = plugin.getVillagers().getString(
+                    villagerId + ".career");
+        }
+        else {
+            this.tier = plugin.getVillagers().getInt(legacyVillagerId);
+            this.career = "villager";
+            
+            saveVillager(this, villager);
+        }
     }
 }

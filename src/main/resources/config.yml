@@ -1,3 +1,4 @@
+overwrite_unknown_villagers: true
 worlds:
     world: config.yml
 allow_vanilla_trades: false

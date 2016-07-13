@@ -24,22 +24,7 @@ public class CvtCommand implements CommandExecutor {
                         return true;
                     }
                 }
-                
-                if (args[0].equalsIgnoreCase("overwrite")) {
-                    if (sender.hasPermission("customvillagetrades.overwrite")) {
-                        if (args.length > 1 && 
-                                args[1].equalsIgnoreCase("true")) {
-                            plugin.overwriteAllTrades();
-                        }
-                        else {
-                            sender.sendMessage("Warning: overwrite is an " +
-                                    "experimental feature. It will replace " +
-                                    "all villager trades with their first " +
-                                    "tier. If you're sure, do " +
-                                    "/customvillagetrades overwrite true");
-                        }
-                    }
-                }
+                return true;
             }
             
             return false;
