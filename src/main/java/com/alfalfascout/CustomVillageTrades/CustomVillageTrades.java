@@ -267,7 +267,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 final List<MerchantRecipe> newTrades = 
                         new ArrayList<MerchantRecipe>();
                 
-                
                 String tradePath = career.career + ".tier" + career.tier;
                 newTrades.addAll(getTradesInTier(file, tradePath));
                 tradePath = "all_villagers.tier" + career.tier;
@@ -287,6 +286,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         }
                     }, 5);
                 }
+                
+                CareerTier.saveVillager(career, villager);
             }
         }
     }
