@@ -273,6 +273,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 newTrades.addAll(getTradesInTier(file, tradePath));
                 
                 if (newTrades.size() > 0) {
+                    villagers.set(villagerId + ".lastnew",
+                            System.currentTimeMillis());
                     Bukkit.getScheduler().scheduleSyncDelayedTask(
                             this, new Runnable() {
                         public void run() {
