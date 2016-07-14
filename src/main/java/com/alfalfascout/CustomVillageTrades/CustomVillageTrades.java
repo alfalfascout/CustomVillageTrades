@@ -797,8 +797,5 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         trades.addAll(getTradesInTier(file, "all_villagers.tier1"));
         
         villager.setRecipes(trades);
-        
-        getLogger().info(villager.getUniqueId().toString() + 
-                "'s trades have been reset.");
      }
 }
