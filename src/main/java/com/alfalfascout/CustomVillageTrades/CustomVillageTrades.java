@@ -173,12 +173,12 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             tree.conf.set("all_villagers", "none");
         }
         
-        if (!tree.conf.contains("currency")) {
+        if (!tree.conf.contains("currency", true)) {
             tree.conf.createSection("currency");
             tree.conf.set("currency", "emerald");
         }
         
-        if (!tree.conf.contains("allow_vanilla_trades")) {
+        if (!tree.conf.contains("allow_vanilla_trades", true)) {
             tree.conf.createSection("allow_vanilla_trades");
             tree.conf.set("allow_vanilla_trades", "false");
         }
