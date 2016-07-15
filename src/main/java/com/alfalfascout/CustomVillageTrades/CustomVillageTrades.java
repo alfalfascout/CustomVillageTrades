@@ -713,7 +713,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 
                 if (item.getType().equals(Material.ENCHANTED_BOOK) ||
                         item.getType().equals(Material.BOOK)) {
-                    item = EnchantHelper.randomlyEnchantBook(this, 
+                    item = EnchantHelper.randomlyEnchantBook(this, item,
                             allowTreasure);
                 }
                 else {
