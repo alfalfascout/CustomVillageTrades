@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 
 public class CvtCommand implements CommandExecutor {
     private final CustomVillageTrades plugin;
+    private final String noPermission = "You don't have permission to do that.";
     
     public CvtCommand(CustomVillageTrades plugin) {
         this.plugin = plugin;
@@ -23,10 +24,32 @@ public class CvtCommand implements CommandExecutor {
                         sender.sendMessage("Configs and trade lists reloaded.");
                         return true;
                     }
+                    else {
+                        sender.sendMessage(noPermission);
+                    }
+                }
+                
+                if (args[0].equalsIgnoreCase("reset")) {
+                    if (!sender.hasPermission("customvillagetrades.reset")) {
+                        sender.sendMessage(noPermission);
+                        return true;
+                    }
+                    
+                    if (args.length > 1 && args[1].equalsIgnoreCase("true")) {
+                        plugin.resetVillagers();
+                        sender.sendMessage("All villagers erased from memory.");
+                        return true;
+                    }
+                    else {
+                        sender.sendMessage("This command will erase all " +
+                                "known villagers from memory. \n If you're " +
+                                "sure, do /cvt reset true");
+                        return true;
+                    }
                 }
             }
             
-            return false;
+            return true;
         }
         
         return false;

@@ -262,6 +262,7 @@ public class CareerTier {
         plugin.getVillagers().set(villagerId + ".career", careerTier.career);
         plugin.getVillagers().set(
                 villagerId + ".lastvanilla", careerTier.lastVanilla);
+        plugin.saveVillagers();
     }
     
     public void loadVillager(Villager villager) { 

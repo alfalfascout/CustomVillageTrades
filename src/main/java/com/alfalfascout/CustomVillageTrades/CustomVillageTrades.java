@@ -49,16 +49,20 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     }
     
     public void onDisable() {
-        try {
-            villagers.save(new File(getDataFolder(), "villagers.yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveVillagers();
         saveConfig();
     }
     
     public FileConfiguration getVillagers() {
         return CustomVillageTrades.villagers;
+    }
+    
+    public void saveVillagers() {
+        try {
+            villagers.save(new File(getDataFolder(), "villagers.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     // gets the specified trade list or the default config if not found
@@ -797,5 +801,12 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         trades.addAll(getTradesInTier(file, "all_villagers.tier1"));
         
         villager.setRecipes(trades);
-     }
+    }
+    
+    public void resetVillagers() {
+        for (String key : villagers.getKeys(false)) {
+            villagers.set(key, null);
+        }
+        saveVillagers();
+    }
 }
