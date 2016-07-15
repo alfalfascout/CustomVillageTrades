@@ -65,6 +65,13 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
     }
     
+    public void resetVillagers() {
+        for (String key : villagers.getKeys(false)) {
+            villagers.set(key, null);
+        }
+        saveVillagers();
+    }
+    
     // gets the specified trade list or the default config if not found
     public FileAndConfig getTree(String file) {
         
@@ -74,6 +81,14 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         else {
             return trees.get("config");
         }
+    }
+    
+    public void getDefaultConfigs() {
+        populateTree(getTree("config"));
+        if (!getConfig().contains("overwrite_unknown_villagers", true)) {
+            getConfig().set("overwrite_unknown_villagers", false);
+        }
+        saveConfig();
     }
     
     // makes sure the plugin has all the config flies it needs
@@ -151,14 +166,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 }
             }
         }
-    }
-    
-    public void getDefaultConfigs() {
-        populateTree(getTree("config"));
-        if (!getConfig().contains("overwrite_unknown_villagers", true)) {
-            getConfig().set("overwrite_unknown_villagers", false);
-        }
-        saveConfig();
     }
     
     // make sure all villager types, currency, and vanilla bool are in the tree
@@ -803,12 +810,5 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         trades.addAll(getTradesInTier(file, "all_villagers.tier1"));
         
         villager.setRecipes(trades);
-    }
-    
-    public void resetVillagers() {
-        for (String key : villagers.getKeys(false)) {
-            villagers.set(key, null);
-        }
-        saveVillagers();
     }
 }
