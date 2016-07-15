@@ -233,22 +233,23 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     @EventHandler
     public void onOpenInventory(InventoryOpenEvent e) {
-        InventoryHolder holder = e.getView().getTopInventory().getHolder();
+        final InventoryHolder holder = 
+                e.getView().getTopInventory().getHolder();
         
         if (holder instanceof Villager) {
-            CareerTier villagerCareer = new CareerTier(this);
             
-            if (villagers.contains("id" + Integer.toString(
-                            ((Villager) holder).getEntityId()))) {
-                villagerCareer.loadVillager((Villager) holder);
-                
-            }
-            
-            if (getConfig().getBoolean("overwrite_unknown_villagers") && 
-                    !villagers.contains("id" +
-                            ((Villager) holder).getUniqueId().toString())) {
-                overwriteTrades((Villager) holder);
-            }
+            Bukkit.getScheduler().scheduleSyncDelayedTask(
+                    this, new Runnable() {
+                public void run() {
+                    try {
+                        handleMetVillager((Villager) holder);
+                    }
+                    catch (ConcurrentModificationException e) {
+                        e.printStackTrace();
+                        getLogger().warning("Concurrent modification?");
+                    }
+                }
+            }, 10);
         }
         
     }
@@ -769,6 +770,21 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         recipe.setIngredients(ingredients);
         
         return recipe;
+    }
+    
+    public void handleMetVillager(Villager villager) {
+        CareerTier villagerCareer = new CareerTier(this);
+        
+        if (villagers.contains("id" + villager.getUniqueId().toString())) {
+            villagerCareer.loadVillager(villager);
+            
+        }
+        
+        if (getConfig().getBoolean("overwrite_unknown_villagers") && 
+                !villagers.contains("id" +
+                        (villager).getUniqueId().toString())) {
+            overwriteTrades(villager);
+        }
     }
     
     // overwrites this villager with their first trade tier
