@@ -377,7 +377,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             e.setRecipe(recipe);
         }
         
-        String villagerId = "id" + Integer.toString(villager.getEntityId());
+        String villagerId = "id" + villager.getUniqueId().toString();
         villagers.set(villagerId + ".lastnew", System.currentTimeMillis());
     }
     
