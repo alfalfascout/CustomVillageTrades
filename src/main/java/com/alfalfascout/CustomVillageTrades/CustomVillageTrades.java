@@ -784,7 +784,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
         CareerTier.saveVillager(careerTier, villager);
         
-        String world = villager.getEyeLocation().getWorld().toString();
+        String world = villager.getEyeLocation().getWorld().getName();
         FileConfiguration file = getTree(world).conf;
         
         List<MerchantRecipe> trades = getTradesInTier(
