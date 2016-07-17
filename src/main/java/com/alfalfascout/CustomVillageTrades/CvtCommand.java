@@ -60,6 +60,7 @@ public class CvtCommand implements CommandExecutor {
         plugin.reloadConfig();
         plugin.populateWorlds();
         plugin.loadTreesByWorld();
+        plugin.getDefaultConfigs();
         
         return true;
     }

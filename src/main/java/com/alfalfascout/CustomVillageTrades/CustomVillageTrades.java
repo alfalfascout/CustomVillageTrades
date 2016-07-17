@@ -469,283 +469,328 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     // build individual ItemStack at the given path of the given world file
     public ItemStack getItemInTrade(FileConfiguration f, String path) {
+        Material itemType = getItemType(f, path);
+        ItemStack item = new ItemStack(itemType);
+        
+        if (f.contains(path + ".name")) {
+            getItemName(f, item, path);
+        }
+        
+        if (f.contains(path + ".lore")) {
+            getItemLore(f, item, path);
+        }
+        
+        // handle complex items like potions, spawn eggs, etc
+        switch (itemType) {
+            case MONSTER_EGG:
+                handleSpawnEgg(f, item, path);
+                break;
+            case POTION:
+            case SPLASH_POTION:
+                handlePotion(f, item, path);
+                break;
+            default:
+                break;
+        }
+        
+        if (f.contains(path + ".min") &&
+                f.contains(path + ".max")) {
+            getItemAmount(f, item, path);
+        }
+        
+        if (f.contains(path + ".data")) {
+            getItemData(f, item, path);
+        }
+        
+        if (f.contains(path + ".enchantment")) {
+            handleEnchantment(f, item, path);
+        }
+        
+        return item;
+    }
+    
+    public Material getItemType(FileConfiguration f, String path) {
+        if (!f.contains(path + ".material") ||
+                !f.isString(path + ".material")) {
+            getLogger().info(path + " needs a valid material.");
+            f.set(path + ".material", "stone");
+        }
+        
         String materialName = f.getString(path + ".material");
         Material itemType;
         
-        // get the item type
         if (materialName.equals("currency")) {
             itemType = getCurrency(f);
         }
         else {
             itemType = Material.matchMaterial(materialName);
-            
+        
             if (itemType == null) {
                 itemType = Material.COBBLESTONE;
-                getLogger().warning("No material matching '" + 
+                getLogger().warning("No material matching '" +
                         materialName + "'. It's cobbles now. " + path);
             }
         }
+        return itemType;
+    }
+    
+    public ItemStack getItemName(FileConfiguration f, ItemStack item,
+                                  String path) {
+        ItemMeta meta = item.getItemMeta();
         
-        ItemStack item = new ItemStack(itemType);
-        
-        // get item name
-        if (f.contains(path + ".name")) {
-            ItemMeta meta = item.getItemMeta();
-            try {
-                meta.setDisplayName(f.getString(path + ".name"));
-                item.setItemMeta(meta);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        
-        // get item lore
-        if (f.contains(path + ".lore")) {
-            ItemMeta meta = item.getItemMeta();
-            List<String> lore = Arrays.asList(
-                    f.getString(path + ".lore").split(","));
-            try {
-                meta.setLore(lore);
-                item.setItemMeta(meta);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        
-        // handle spawn eggs
-        if (itemType.equals(Material.MONSTER_EGG)) {
-            EntityType spawnEggType = EntityType.PIG; 
-            if (f.contains(path + ".spawns")) {
-                try {
-                    spawnEggType = EntityType.valueOf(
-                            f.getString(path + ".spawns").toUpperCase());
-                }
-                catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                    getLogger().warning(f.getString(path + ".spawns") + 
-                            " is not a valid entity type for spawn eggs.");
-                    spawnEggType = EntityType.PIG; 
-                }
-            }
-            
-            SpawnEgg spawnEgg = new SpawnEgg(spawnEggType);
-            item = spawnEgg.toItemStack(1);
-        }
-        
-        // handle potions
-        if (itemType.equals(Material.POTION) || 
-                itemType.equals(Material.SPLASH_POTION)) {
-            PotionMeta meta = (PotionMeta) item.getItemMeta();
-            PotionType potionType = PotionType.WATER;
-            boolean potionExtended = false;
-            boolean potionUpgraded = false;
-            
-            if (f.contains(path + ".potion.type")) {
-                try {
-                    potionType = PotionType.valueOf(
-                            f.getString(path + ".potion.type").toUpperCase());
-                }
-                catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                    getLogger().warning(f.getString(path + ".potion.type") + 
-                            " is not a valid potion type.");
-                }
-            }
-            
-            if (f.contains(path + ".potion.extended") && 
-                    potionType.isExtendable()) {
-                try {
-                    potionExtended = f.getBoolean(path + ".potion.extended");
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                    getLogger().warning("'extended' should be true or false.");
-                }
-            }
-            
-            if (f.contains(path + ".potion.upgraded") &&
-                    potionType.isUpgradeable()) {
-                try {
-                    potionUpgraded = f.getBoolean(path + ".potion.upgraded");
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                    getLogger().warning("'upgraded' should be true or false.");
-                }
-            }
-            
-            if ((potionExtended && potionUpgraded)) {
-                getLogger().warning(
-                        "Potion cannot be both extended and upgraded.");
-                potionExtended = false;
-                potionUpgraded = false;
-            }
-            
-            PotionData potionData = 
-                    new PotionData(potionType, potionExtended, potionUpgraded);
-            meta.setBasePotionData(potionData);
+        if (f.isString(path + ".name")) {
+            meta.setDisplayName(f.getString(path + ".name"));
             item.setItemMeta(meta);
         }
+        else {
+            getLogger().info(path + ".name should be a string.");
+            meta.setDisplayName("a string");
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+    
+    public ItemStack getItemLore(FileConfiguration f, ItemStack item,
+                                  String path) {
+        ItemMeta meta = item.getItemMeta();
+        if (f.isString(path + ".lore")) {
+            List<String> lore = Arrays.asList(
+                    f.getString(path + ".lore").split(","));
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+        }
+        else {
+            getLogger().info(path + ".lore should be a string.");
+            meta.setLore(Arrays.asList("a string"));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+    
+    public ItemStack getItemAmount(FileConfiguration f, ItemStack item,
+                                  String path) {
+        if (!f.isInt(path + ".min") || !f.isInt(path + ".max")) {
+            getLogger().info("Min and max should both be integers at " + path);
+            return item;
+        }
         
-        // get how many of the item there are
-        if (f.contains(path + ".min") &&
-                f.contains(path + ".max")) {
+        int min = f.getInt(path + ".min");
+        if (min < 0) {
+            getLogger().warning("min must be greater than zero at " + path);
+            min = 1;
+        }
+    
+        int max = 1 + f.getInt(path + ".max") - min;
+        if ((max + min) < min) {
+            getLogger().warning("max must at least as great as min at " + path);
+            max = 1;
+        }
+    
+        int amount = rand.nextInt(max) + min;
+        if (amount > item.getMaxStackSize()) {
+            if (!f.equals("vanilla")) {
+                getLogger().warning("The maximum stack size for " +
+                        item.getType().toString() + " is " +
+                        Integer.toString(item.getMaxStackSize()));
+            }
+            amount = item.getMaxStackSize();
+        }
+    
+        item.setAmount(amount);
+    
+        return item;
+    }
+    
+    public ItemStack getItemData(FileConfiguration f, ItemStack item,
+                                  String path) {
+        if (!f.isInt(path + ".data")) {
+            getLogger().info(path + ".data should be a number.");
+        }
+        item.setDurability(
+                (short)f.getInt(path + ".data"));
+        
+        return item;
+    }
+    
+    public ItemStack handleSpawnEgg(FileConfiguration f, ItemStack item,
+                                    String path) {
+        EntityType spawnEggType = EntityType.PIG;
+        if (f.contains(path + ".spawns")) {
             try {
-                int min = f.getInt(path + ".min");
-                if (min < 0) {
-                    getLogger().warning("min must be greater than zero.");
-                    min = 1;
-                }
-                
-                int max = 1 + f.getInt(path + ".max") - min;
-                if ((max + min) < min) {
-                    getLogger().warning("max must at least as great as min.");
-                    max = 1;
-                }
-                
-                int amount = rand.nextInt(max) + min;
-                if (amount > item.getMaxStackSize()) {
-                    if (!f.equals("vanilla")) {
-                        getLogger().warning("The maximum stack size for " +
-                                item.getType().toString() + " is " + 
-                                Integer.toString(item.getMaxStackSize()));
-                    }
-                    amount = item.getMaxStackSize();
-                }
-                
-                item.setAmount(amount);
+                spawnEggType = EntityType.valueOf(
+                        f.getString(path + ".spawns").toUpperCase());
+            }
+            catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                getLogger().warning(f.getString(path + ".spawns") +
+                        " is not a valid entity type for spawn eggs.");
+                spawnEggType = EntityType.PIG;
+            }
+        }
+    
+        SpawnEgg spawnEgg = new SpawnEgg(spawnEggType);
+        item = spawnEgg.toItemStack(1);
+        return item;
+    }
+    
+    public ItemStack handlePotion(FileConfiguration f, ItemStack item,
+                                  String path) {
+        PotionMeta meta = (PotionMeta) item.getItemMeta();
+        PotionType potionType = PotionType.WATER;
+        boolean potionExtended = false;
+        boolean potionUpgraded = false;
+    
+        if (f.contains(path + ".potion.type")) {
+            try {
+                potionType = PotionType.valueOf(
+                        f.getString(path + ".potion.type").toUpperCase());
+            }
+            catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                getLogger().warning(f.getString(path + ".potion.type") +
+                        " is not a valid potion type.");
+            }
+        }
+    
+        if (f.contains(path + ".potion.extended") &&
+                potionType.isExtendable()) {
+            try {
+                potionExtended = f.getBoolean(path + ".potion.extended");
             }
             catch (Exception e) {
                 e.printStackTrace();
-                getLogger().warning("The value in " + path +
-                        ".min or .max should be an integer between 1 and 64.");
+                getLogger().warning("'extended' should be true or false.");
             }
         }
-        
-        // get any extra data/damage value
-        if (f.contains(path + ".data")) {
+    
+        if (f.contains(path + ".potion.upgraded") &&
+                potionType.isUpgradeable()) {
             try {
-                item.setDurability(
-                        (short)f.getInt(path + ".data"));
+                potionUpgraded = f.getBoolean(path + ".potion.upgraded");
             }
             catch (Exception e) {
                 e.printStackTrace();
-                getLogger().warning("The value in " + path + 
-                        ".data should be an integer above zero.");
+                getLogger().warning("'upgraded' should be true or false.");
             }
-            
         }
+    
+        if ((potionExtended && potionUpgraded)) {
+            getLogger().warning(
+                    "Potion cannot be both extended and upgraded.");
+            potionExtended = false;
+            potionUpgraded = false;
+        }
+    
+        PotionData potionData =
+                new PotionData(potionType, potionExtended, potionUpgraded);
+        meta.setBasePotionData(potionData);
+        item.setItemMeta(meta);
+        return item;
+    }
+    
+    public ItemStack handleEnchantment(FileConfiguration f, ItemStack item,
+                                       String path) {
+        // get user-specified enchantments
+        if (f.contains(path + ".enchantment.enchant1")) {
+            String enchantPath = path + ".enchantment.enchant1";
+            int enchantNum = 1;
         
-        // get enchantments
-        if (f.contains(path + ".enchantment")) {
+            while (f.contains(enchantPath)) {
+                int specLevel = 1;
+                Enchantment specType = Enchantment.DURABILITY;
             
-            // get user-specified enchantments
-            if (f.contains(path + ".enchantment.enchant1")) {
-                String enchantPath = path + ".enchantment.enchant1";
-                int enchantNum = 1;
+                if (f.contains(enchantPath + ".type")) {
+                    String typeString = f.getString(
+                            enchantPath + ".type").toUpperCase();
                 
-                while (f.contains(enchantPath)) {
-                    int specLevel = 1;
-                    Enchantment specType = Enchantment.DURABILITY;
-                    
-                    if (f.contains(enchantPath + ".type")) {
-                        String typeString = f.getString(
-                                enchantPath + ".type").toUpperCase();
-                        
-                        if (typeString.equals("random")) {
-                            specType = EnchantHelper.getRandomEnchantment(
-                                    this, item);
-                        }
-                        else {
-                            specType = Enchantment.getByName(typeString);
-                        }
-                        
-                        if (specType == null) {
-                            getLogger().warning("No valid type: " + typeString);
-                            specType = Enchantment.DURABILITY;
-                        }
-                    }
-                    
-                    if (f.contains(enchantPath + ".level")) {
-                        String levelString = f.getString(
-                                enchantPath + ".level");
-                        
-                        if (levelString.equals("random")) {
-                            specLevel = rand.nextInt(
-                                    specType.getMaxLevel()) + 1;
-                        }
-                        else {
-                            specLevel = f.getInt(
-                                    enchantPath + ".level");
-                        }
-                    }
-                    
-                    LeveledEnchantment specEnchant = new LeveledEnchantment(
-                            this, specType.hashCode(), specLevel);
-                    
-                    if (specEnchant.canEnchantItem(item) || 
-                            item.getType().equals(Material.ENCHANTED_BOOK)) {
-                        EnchantHelper.applyEnchantment(
-                                this, item, specEnchant);
+                    if (typeString.equals("random")) {
+                        specType = EnchantHelper.getRandomEnchantment(
+                                this, item);
                     }
                     else {
-                        getLogger().warning("The enchantment " + 
-                                specEnchant.toString() +
-                                " can't be applied to " + item.toString());
+                        specType = Enchantment.getByName(typeString);
                     }
-                    
-                    enchantNum++;
-                    enchantPath = (path + ".enchantment.enchant" +
-                            Integer.toString(enchantNum));
-                }
-            }
-            
-            // OR generate random enchantments
-            else {
-                int level = 1;
-                boolean allowTreasure = false;
                 
-                if (f.contains(path + ".enchantment.level")) {
-                    try {
-                        level = f.getInt(path + ".enchantment.level");
-                        if (level < 0) {
+                    if (specType == null) {
+                        getLogger().warning("No valid type: " + typeString);
+                        specType = Enchantment.DURABILITY;
+                    }
+                }
+            
+                if (f.contains(enchantPath + ".level")) {
+                    String levelString = f.getString(
+                            enchantPath + ".level");
+                
+                    if (levelString.equals("random")) {
+                        specLevel = rand.nextInt(
+                                specType.getMaxLevel()) + 1;
+                    }
+                    else {
+                        specLevel = f.getInt(
+                                enchantPath + ".level");
+                    }
+                }
+            
+                LeveledEnchantment specEnchant = new LeveledEnchantment(
+                        this, specType.hashCode(), specLevel);
+            
+                if (specEnchant.canEnchantItem(item) ||
+                        item.getType().equals(Material.ENCHANTED_BOOK)) {
+                    EnchantHelper.applyEnchantment(
+                            this, item, specEnchant);
+                }
+                else {
+                    getLogger().warning("The enchantment " +
+                            specEnchant.toString() +
+                            " can't be applied to " + item.toString());
+                }
+            
+                enchantNum++;
+                enchantPath = (path + ".enchantment.enchant" +
+                        Integer.toString(enchantNum));
+            }
+        }
+    
+        // OR generate random enchantments
+        else {
+            int level = 1;
+            boolean allowTreasure = false;
+    
+            if (f.contains(path + ".enchantment.level")) {
+                try {
+                    level = f.getInt(path + ".enchantment.level");
+                    if (level < 0) {
                         getLogger().warning(
                                 "Enchantment level must be greater than zero.");
                         level = 1;
-                        }
                     }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                        getLogger().warning("The value in " + path + 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    getLogger().warning("The value in " + path +
                             ".enchantment.level should be an integer.");
-                    }
                 }
-            
-                
-                if (f.contains(path + ".enchantment.allow_treasure")) {
-                    try {
-                        allowTreasure = f.getBoolean(path
-                                + ".enchantment.allow_treasure");
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                        getLogger().warning("The value in " + path + 
-                                ".enchantment.allow_treasure should be " +
-                                "true or false.");
-                    }
+            }
+    
+    
+            if (f.contains(path + ".enchantment.allow_treasure")) {
+                try {
+                    allowTreasure = f.getBoolean(path
+                            + ".enchantment.allow_treasure");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    getLogger().warning("The value in " + path +
+                            ".enchantment.allow_treasure should be " +
+                            "true or false.");
                 }
-                
-                if (item.getType().equals(Material.ENCHANTED_BOOK) ||
-                        item.getType().equals(Material.BOOK)) {
-                    item = EnchantHelper.randomlyEnchantBook(this, item,
-                            allowTreasure);
-                }
-                else {
-                    item = EnchantHelper.randomlyEnchant(this, 
-                            item, level, allowTreasure);
-                }
+            }
+    
+            if (item.getType().equals(Material.ENCHANTED_BOOK) ||
+                    item.getType().equals(Material.BOOK)) {
+                item = EnchantHelper.randomlyEnchantBook(this, item,
+                        allowTreasure);
+            } else {
+                item = EnchantHelper.randomlyEnchant(this,
+                        item, level, allowTreasure);
             }
         }
         return item;
