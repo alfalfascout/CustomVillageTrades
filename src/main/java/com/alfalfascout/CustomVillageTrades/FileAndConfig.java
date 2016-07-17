@@ -51,8 +51,9 @@ public class FileAndConfig {
         return repr;
     }
     
+    // if this config has a file, save it. otherwise, ignore it
     public void save() {
-        if (!this.file.equals(null)) {
+        if (this.file != null) {
             try {
                 this.conf.save(this.file);
             } 
