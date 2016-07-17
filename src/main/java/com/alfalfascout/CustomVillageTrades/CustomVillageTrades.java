@@ -51,6 +51,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     public void onDisable() {
         saveVillagers();
         saveConfig();
+        for (String world : trees.keySet()) {
+            getTree(world).save();
+        }
     }
     
     public FileConfiguration getVillagers() {
@@ -65,6 +68,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
     }
     
+    // empty villagers file
     public void resetVillagers() {
         for (String key : villagers.getKeys(false)) {
             villagers.set(key, null);
@@ -233,13 +237,14 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return vanillaTrades;
     }
     
+    // when the player opens an unmet villager inventory, overwrite the villager
     @EventHandler
     public void onOpenInventory(InventoryOpenEvent e) {
         final InventoryHolder holder = 
                 e.getView().getTopInventory().getHolder();
         
         if (holder instanceof Villager) {
-            
+            // delay handling to allow new villagers to populate trade lists
             Bukkit.getScheduler().scheduleSyncDelayedTask(
                     this, new Runnable() {
                 public void run() {
@@ -256,7 +261,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
     }
     
-    
+    // when the villager replenishes their trades, give them new ones
+    // if they're out of vanilla trades
     @EventHandler
     public void onTradeReplenish(VillagerReplenishTradeEvent e) {
         final Villager villager = e.getEntity();
@@ -286,6 +292,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 tradePath = "all_villagers.tier" + career.tier;
                 newTrades.addAll(getTradesInTier(file, tradePath));
                 
+                // delay adding trades to avoid concurrent modification
                 if (newTrades.size() > 0) {
                     Bukkit.getScheduler().scheduleSyncDelayedTask(
                             this, new Runnable() {
@@ -311,6 +318,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     }
     
     
+    // when a villager gets a vanilla trade, find out what tier it is
+    // and give them the trades from their world's tree
     @EventHandler
     public void onTradeAcquire(VillagerAcquireTradeEvent e) {
         Villager villager = e.getEntity();
@@ -397,8 +406,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     // get all the trades in the given path (tier) of the given world file
     public List<MerchantRecipe> getTradesInTier(
             FileConfiguration f, String path) {
-        List<MerchantRecipe> list = new ArrayList<MerchantRecipe>();
+        List<MerchantRecipe> recipes = new ArrayList<MerchantRecipe>();
         
+        // if this tier is marked default, get pseudo vanilla trades instead
         if (f.isString(path) &&
                 f.getString(path).equals("default")) {
             f = getTree("vanilla").conf;
@@ -445,16 +455,16 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         tradePath + ".ingredient2")));
             }
             
-            list.add(new MerchantRecipe(result, 7));
+            recipes.add(new MerchantRecipe(result, 7));
             
             for (ItemStack ingredient : ingredients) {
-                list.get(list.size() - 1).addIngredient(ingredient);
+                recipes.get(recipes.size() - 1).addIngredient(ingredient);
             }
             
             tradeNum++;
         }
         
-        return list;
+        return recipes;
     }
     
     // build individual ItemStack at the given path of the given world file
@@ -774,12 +784,14 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return recipe;
     }
     
+    // if we haven't met the villager, overwrite their trades
     public void handleMetVillager(Villager villager) {
         CareerTier villagerCareer = new CareerTier(this);
         
-        if (villagers.contains("id" + villager.getUniqueId().toString())) {
+        // handle legacy configs?
+        if (villagers.contains("id" +
+                Integer.toString(villager.getEntityId()))) {
             villagerCareer.loadVillager(villager);
-            
         }
         
         if (getConfig().getBoolean("overwrite_unknown_villagers") && 
