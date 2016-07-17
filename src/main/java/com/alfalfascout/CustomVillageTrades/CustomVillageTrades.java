@@ -198,6 +198,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     // get the currency of the given world configuration
     public Material getCurrency(FileConfiguration f) {
+        if (!f.contains("currency", true)) {
+            f.set("currency", "emerald");
+        }
+        
         Material currency = Material.matchMaterial(
                 f.getString("currency"));
         if (currency == null) {
@@ -218,14 +222,12 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     // get whether vanilla trades are allowed in the current world config
     public boolean getAllowVanilla(FileConfiguration f) {
         boolean vanillaTrades = false;
-        
-        try {
+        if (f.contains("allow_vanilla_trades") &&
+                f.isBoolean("allow_vanilla_trades")) {
             vanillaTrades = f.getBoolean("allow_vanilla_trades");
         }
-        catch (Exception e) {
-            e.printStackTrace();
-            getLogger().warning("Value at allow_vanilla_trades " +
-                    "should be true or false.");
+        else {
+            f.set("allow_vanilla_trades", false);
         }
         
         return vanillaTrades;
