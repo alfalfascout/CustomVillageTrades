@@ -61,12 +61,16 @@ public class CvtCommand implements CommandExecutor {
                     }
                     
                     if (!(args.length > 1)) {
-                        sender.sendMessage("/cvt make <banner|?> \nMakes " + 
+                        sender.sendMessage("/cvt make <banner|book> \nMakes " + 
                                 "a yml from the item in your hand.");
                         return true;
                     }
                     
                     Player player = (Player) sender;
+                    Material mainItem = 
+                            player.getInventory().getItemInMainHand().getType();
+                    Material offItem = 
+                            player.getInventory().getItemInOffHand().getType();
                     
                     if (args[1].equalsIgnoreCase("banner")) {
                         if (!player.hasPermission(
@@ -74,16 +78,14 @@ public class CvtCommand implements CommandExecutor {
                             sender.sendMessage(noPermission);
                             return true;
                         }
-                        if (player.getInventory().getItemInMainHand(
-                                ).getType().equals(Material.BANNER)) {
+                        if (mainItem.equals(Material.BANNER)) {
                             ItemStack banner = 
                                     player.getInventory().getItemInMainHand();
                             metaHelper.makeBannerFile(banner);
                             sender.sendMessage("Banner file created.");
                             return true;
                         }
-                        else if (player.getInventory().getItemInOffHand(
-                                ).getType().equals(Material.BANNER)) {
+                        else if (offItem.equals(Material.BANNER)) {
                             ItemStack banner = 
                                     player.getInventory().getItemInOffHand();
                             metaHelper.makeBannerFile(banner);
@@ -92,6 +94,35 @@ public class CvtCommand implements CommandExecutor {
                         }
                         else {
                             sender.sendMessage("Hold the banner you want to " +
+                                    "make a yml from.");
+                            return true;
+                        }
+                    }
+                    
+                    if (args[1].equalsIgnoreCase("book")) {
+                        if (!player.hasPermission(
+                                "customvillagetrades.make.book")) {
+                            sender.sendMessage(noPermission);
+                            return true;
+                        }
+                        if (mainItem.equals(Material.BOOK_AND_QUILL) ||
+                                mainItem.equals(Material.WRITTEN_BOOK)) {
+                            ItemStack book = 
+                                    player.getInventory().getItemInMainHand();
+                            metaHelper.makeBookFile(book);
+                            sender.sendMessage("Book file created.");
+                            return true;
+                        }
+                        else if (offItem.equals(Material.BOOK_AND_QUILL) ||
+                                offItem.equals(Material.WRITTEN_BOOK)) {
+                            ItemStack book = 
+                                    player.getInventory().getItemInOffHand();
+                            metaHelper.makeBookFile(book);
+                            sender.sendMessage("Book file created.");
+                            return true;
+                        }
+                        else {
+                            sender.sendMessage("Hold the book you want to " +
                                     "make a yml from.");
                             return true;
                         }

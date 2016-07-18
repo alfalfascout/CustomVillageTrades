@@ -17,6 +17,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.BookMeta.Generation;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -112,7 +114,8 @@ public class MetaHelper {
             }
             catch (Exception e) {
                 e.printStackTrace();
-                plugin.getLogger().warning("'extended' should be true or false.");
+                plugin.getLogger().warning(
+                        "'extended' should be true or false.");
             }
         }
     
@@ -123,7 +126,8 @@ public class MetaHelper {
             }
             catch (Exception e) {
                 e.printStackTrace();
-                plugin.getLogger().warning("'upgraded' should be true or false.");
+                plugin.getLogger().warning(
+                        "'upgraded' should be true or false.");
             }
         }
     
@@ -230,6 +234,54 @@ public class MetaHelper {
         return item;
     }
     
+    public ItemStack handleBook(FileConfiguration f, ItemStack item,
+            String path) {
+        BookMeta meta = (BookMeta) item.getItemMeta();
+        if (f.contains(path + ".book") && f.isString(path + ".book")) {
+            File bookFile = new File(plugin.getDataFolder(),
+                    f.getString(path + ".book"));
+            try {
+                bookFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileConfiguration b = 
+                    YamlConfiguration.loadConfiguration(bookFile);
+            b.setDefaults(plugin.defaultBook);
+            
+            if (b.contains("author") && b.isString("author")) {
+                meta.setAuthor(b.getString("author"));
+            }
+            
+            if (b.contains("title") && b.isString("title")) {
+                meta.setTitle(b.getString("title"));
+            }
+            
+            if (b.contains("status") && b.isString("status")) {
+                meta.setGeneration(Generation.valueOf(b.getString("status")));
+            }
+            
+            if (b.contains("pages")) {
+                List<String> pages = new ArrayList<String>();
+                int pageNum = 1;
+                String pagePath = "pages.page" + Integer.toString(pageNum);
+                
+                while (b.contains(pagePath)) {
+                    pages.add(b.getString(pagePath));
+                    
+                    pageNum++;
+                    pagePath = "pages.page" + Integer.toString(pageNum);
+                }
+                
+                meta.setPages(pages);
+            }
+            
+            item.setItemMeta(meta);
+        }
+        
+        return item;
+    }
+    
     public ItemStack handleEnchantment(FileConfiguration f, ItemStack item,
             String path) {
         // get user-specified enchantments
@@ -254,7 +306,8 @@ public class MetaHelper {
                     }
                 
                     if (specType == null) {
-                        plugin.getLogger().warning("No valid type: " + typeString);
+                        plugin.getLogger().warning("No valid type: " + 
+                                typeString);
                         specType = Enchantment.DURABILITY;
                     }
                 }
@@ -377,6 +430,59 @@ public class MetaHelper {
         
         try {
             bannerConf.save(bannerFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void makeBookFile(ItemStack bookItem) {
+        if (!(bookItem.getType().equals(Material.WRITTEN_BOOK) ||
+                bookItem.getType().equals(Material.BOOK_AND_QUILL))) {
+            plugin.getLogger().info("That's not a book.");
+            return;
+        }
+        BookMeta bookMeta = (BookMeta) bookItem.getItemMeta();
+        
+        Integer bookNo = new Integer(1);
+        String bookName = "book" + bookNo.toString() + ".yml";
+        File bookFile = new File(plugin.getDataFolder(), bookName);
+        try {
+            while (!bookFile.createNewFile()) {
+                bookNo++;
+                bookName = "book" + bookNo.toString() + ".yml";
+                bookFile = new File(plugin.getDataFolder(), bookName);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        FileConfiguration bookConf = new YamlConfiguration();
+        
+        if (bookMeta.hasAuthor()) {
+            bookConf.set("author", bookMeta.getAuthor());
+        }
+        
+        if (bookMeta.hasTitle()) {
+            bookConf.set("title", bookMeta.getTitle());
+        }
+        
+        if (bookMeta.getGeneration() != null) {
+            bookConf.set("status", bookMeta.getGeneration().name());
+        }
+        
+        if (bookMeta.hasPages()) {
+            bookConf.createSection("pages");
+            String page = "";
+            String path = "";
+            for (int i = 1; i <= bookMeta.getPageCount(); i++) {
+                page = bookMeta.getPage(i);
+                path = "pages.page" + Integer.toString(i);
+                bookConf.set(path, page);
+            }
+        }
+        
+        try {
+            bookConf.save(bookFile);
         } catch (IOException e) {
             e.printStackTrace();
         }

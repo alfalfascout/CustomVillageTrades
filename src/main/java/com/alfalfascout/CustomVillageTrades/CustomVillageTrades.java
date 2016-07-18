@@ -9,7 +9,8 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random; 
+import java.util.Random;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -32,7 +33,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     static Random rand = new Random();
     private static FileConfiguration villagers;
     static Map<String,FileAndConfig> trees;
-    FileConfiguration defaultBanner;
+    FileConfiguration defaultBanner, defaultBook;
     MetaHelper metaHelper = new MetaHelper(this);
     
     public void onEnable() {
@@ -117,6 +118,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         // default banner (not modifiable by the user)
         Reader bannerReader = getTextResource("default_banner.yml");
         defaultBanner = YamlConfiguration.loadConfiguration(bannerReader);
+        
+        // default banner (not modifiable by the user)
+        Reader bookReader = getTextResource("default_book.yml");
+        defaultBook = YamlConfiguration.loadConfiguration(bookReader);
         
         // main config file
         File configFile = new File(getDataFolder(), "config.yml");
@@ -494,6 +499,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             case SKULL_ITEM:
                 metaHelper.handleSkull(f, item, path);
                 break;
+            case WRITTEN_BOOK:
+            case BOOK_AND_QUILL:
+                metaHelper.handleBook(f, item, path);
             default:
                 break;
         }
