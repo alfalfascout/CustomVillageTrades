@@ -16,11 +16,11 @@ permissions:
         children:
             customvillagetrades.reload: true
             customvillagetrades.reset: true
-            customvillagetrades.make.banner
-    customvillagetrades.make.*
-        description: Gives access to all CustomVillageTrades make comamnds.
+            customvillagetrades.make.banner: true
+    customvillagetrades.make.*:
+        description: Gives access to all CustomVillageTrades make commands.
         children:
-            customvillagetrades.make.banner
+            customvillagetrades.make.banner: true
     customvillagetrades.reload:
         description: Reloads worlds and trade trees from the config files.
         default: op
