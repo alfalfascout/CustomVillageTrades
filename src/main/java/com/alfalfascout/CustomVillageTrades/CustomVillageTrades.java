@@ -11,8 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random; 
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -28,6 +31,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.SpawnEgg;
@@ -39,6 +43,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     static Random rand = new Random();
     private static FileConfiguration villagers;
     static Map<String,FileAndConfig> trees;
+    static FileConfiguration defaultBanner;
     
     public void onEnable() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
@@ -118,6 +123,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         // vanilla trades (not modifiable by the user)
         Reader vanillaReader = getTextResource("vanilla_trades.yml");
         trees.put("vanilla", new FileAndConfig(vanillaReader));
+        
+        // default banner (not modifiable by the user)
+        Reader bannerReader = getTextResource("default_banner.yml");
+        defaultBanner = YamlConfiguration.loadConfiguration(bannerReader);
         
         // main config file
         File configFile = new File(getDataFolder(), "config.yml");
@@ -489,6 +498,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             case SPLASH_POTION:
                 handlePotion(f, item, path);
                 break;
+            case BANNER:
+                handleBanner(f, item, path);
+                break;
             default:
                 break;
         }
@@ -684,6 +696,83 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         PotionData potionData =
                 new PotionData(potionType, potionExtended, potionUpgraded);
         meta.setBasePotionData(potionData);
+        item.setItemMeta(meta);
+        return item;
+    }
+    
+    public ItemStack handleBanner(FileConfiguration f, ItemStack item, 
+            String path) {
+        BannerMeta meta = (BannerMeta) item.getItemMeta();
+        if (f.contains(path + ".banner") && f.isString(path + ".banner")) {
+            File bannerFile = new File(getDataFolder(),
+                    f.getString(path + ".banner"));
+            try {
+                bannerFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileConfiguration b = 
+                    YamlConfiguration.loadConfiguration(bannerFile);
+            b.setDefaults(defaultBanner);
+
+            // base color
+            if (!b.contains("base.color", true)) {
+                b.set("base.color", "white");
+                try {
+                    b.save(bannerFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            DyeColor base = DyeColor.valueOf(
+                    b.getString("base.color").toUpperCase());
+            if (base == null) {
+                getLogger().info("Invalid base color.");
+                base = DyeColor.WHITE;
+            }
+            meta.setBaseColor(base);
+            
+            // patterns
+            int patternNum = 1;
+            String pPath = "pattern" + Integer.toString(patternNum);
+            List<Pattern> patterns = new ArrayList<Pattern>();
+            
+            while (b.contains(pPath) && patternNum <= 6) {
+                DyeColor pColor = DyeColor.WHITE;
+                PatternType pType = PatternType.BORDER;
+                
+                if (b.contains(pPath + ".color") &&
+                        b.isString(pPath + ".color")) {
+                    pColor = DyeColor.valueOf(
+                            b.getString(pPath + ".color").toUpperCase());
+                    
+                    if (pColor == null) {
+                        getLogger().info("Invalid pattern color.");
+                        pColor = DyeColor.WHITE;
+                    }
+                }
+                
+                if (b.contains(pPath + ".type") &&
+                        b.isString(pPath + ".type")) {
+                    pType = PatternType.valueOf(
+                            b.getString(pPath + ".type").toUpperCase());
+                    
+                    if (pType == null) {
+                        getLogger().info("Invalid pattern type.");
+                        pType = PatternType.BORDER;
+                    }
+                }
+                
+                patterns.add(new Pattern(pColor, pType));
+                
+                patternNum++;
+                pPath = "pattern" + Integer.toString(patternNum);
+            }
+            
+            meta.setPatterns(patterns);
+        }
+        
         item.setItemMeta(meta);
         return item;
     }

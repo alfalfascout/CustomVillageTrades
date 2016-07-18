@@ -1,0 +1,20 @@
+base:
+    color: white
+pattern1:
+    type: stripe_top
+    color: blue
+pattern2:
+    type: stripe_right
+    color: blue
+pattern3:
+    type: half_horizontal_mirror
+    color: white
+pattern4:
+    type: stripe_middle
+    color: blue
+pattern5:
+    type: square_bottom_left
+    color: blue
+pattern6:
+    type: border
+    color: white
