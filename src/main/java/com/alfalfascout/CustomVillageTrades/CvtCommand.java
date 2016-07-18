@@ -1,15 +1,20 @@
 package com.alfalfascout.CustomVillageTrades;
 
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class CvtCommand implements CommandExecutor {
     private final CustomVillageTrades plugin;
     private final String noPermission = "You don't have permission to do that.";
+    private final MetaHelper metaHelper;
     
     public CvtCommand(CustomVillageTrades plugin) {
         this.plugin = plugin;
+        metaHelper = plugin.metaHelper;
     }
     
     @Override
@@ -45,6 +50,51 @@ public class CvtCommand implements CommandExecutor {
                                 "known villagers from memory. \n If you're " +
                                 "sure, do /cvt reset true");
                         return true;
+                    }
+                }
+                
+                if (args[0].equalsIgnoreCase("make")) {
+                    if (!(sender instanceof Player)) {
+                        sender.sendMessage("Can't make a yml from your held " +
+                                "object because you don't have hands.");
+                        return true;
+                    }
+                    
+                    if (!(args.length > 1)) {
+                        sender.sendMessage("/cvt make <banner|?> \nMakes " + 
+                                "a yml from the item in your hand.");
+                        return true;
+                    }
+                    
+                    Player player = (Player) sender;
+                    
+                    if (args[1].equalsIgnoreCase("banner")) {
+                        if (!player.hasPermission(
+                                "customvillagetrades.make.banner")) {
+                            sender.sendMessage(noPermission);
+                            return true;
+                        }
+                        if (player.getInventory().getItemInMainHand(
+                                ).getType().equals(Material.BANNER)) {
+                            ItemStack banner = 
+                                    player.getInventory().getItemInMainHand();
+                            metaHelper.makeBannerFile(banner);
+                            sender.sendMessage("Banner file created.");
+                            return true;
+                        }
+                        else if (player.getInventory().getItemInOffHand(
+                                ).getType().equals(Material.BANNER)) {
+                            ItemStack banner = 
+                                    player.getInventory().getItemInOffHand();
+                            metaHelper.makeBannerFile(banner);
+                            sender.sendMessage("Banner file created.");
+                            return true;
+                        }
+                        else {
+                            sender.sendMessage("Hold the banner you want to " +
+                                    "make a yml from.");
+                            return true;
+                        }
                     }
                 }
             }

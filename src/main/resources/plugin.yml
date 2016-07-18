@@ -16,9 +16,17 @@ permissions:
         children:
             customvillagetrades.reload: true
             customvillagetrades.reset: true
+            customvillagetrades.make.banner
+    customvillagetrades.make.*
+        description: Gives access to all CustomVillageTrades make comamnds.
+        children:
+            customvillagetrades.make.banner
     customvillagetrades.reload:
         description: Reloads worlds and trade trees from the config files.
         default: op
     customvillagetrades.reset:
         description: Erases all villagers from the villager file.
+        default: op
+    customvillagetrades.make.banner:
+        description: Makes a banner.yml from the player's held banner.
         default: op

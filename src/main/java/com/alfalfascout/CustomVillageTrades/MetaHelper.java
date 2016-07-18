@@ -326,6 +326,50 @@ public class MetaHelper {
         return item;
     }
     
+    public void makeBannerFile(ItemStack bannerItem) {
+        if (!bannerItem.getType().equals(Material.BANNER)) {
+            plugin.getLogger().info("That's not a banner.");
+            return;
+        }
+        BannerMeta bannerMeta = (BannerMeta) bannerItem.getItemMeta();
+        
+        Integer bannerNo = new Integer(1);
+        String bannerName = "banner" + bannerNo.toString() + ".yml";
+        File bannerFile = new File(plugin.getDataFolder(), bannerName);
+        try {
+            while (!bannerFile.createNewFile()) {
+                bannerNo++;
+                bannerName = "banner" + bannerNo.toString() + ".yml";
+                bannerFile = new File(plugin.getDataFolder(), bannerName);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        FileConfiguration bannerConf = new YamlConfiguration();
+        
+        DyeColor baseColor = bannerMeta.getBaseColor();
+        if (baseColor == null) {
+            baseColor = getColorByDurability(bannerItem.getDurability());
+        }
+        bannerConf.set("base.color", baseColor.name());
+        
+        int pNum = 1;
+        String pPath = "pattern" + Integer.toString(pNum);
+        for (Pattern pattern : bannerMeta.getPatterns()) {
+            bannerConf.set(pPath + ".color", pattern.getColor().toString());
+            bannerConf.set(pPath + ".type", pattern.getPattern().toString());
+            pNum++;
+            pPath = "pattern" + Integer.toString(pNum);
+        }
+        
+        try {
+            bannerConf.save(bannerFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public DyeColor getColorByDurability(short durability) {
         switch (durability) {
         case 0:
