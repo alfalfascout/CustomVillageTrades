@@ -491,6 +491,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             case BANNER:
                 metaHelper.handleBanner(f, item, path);
                 break;
+            case SKULL_ITEM:
+                metaHelper.handleSkull(f, item, path);
+                break;
             default:
                 break;
         }

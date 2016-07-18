@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.SpawnEgg;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
@@ -218,8 +219,19 @@ public class MetaHelper {
         return item;
     }
     
+    public ItemStack handleSkull(FileConfiguration f, ItemStack item,
+            String path) {
+        if (f.contains(path + ".owner") && f.isString(path + ".owner")) {
+            SkullMeta meta = (SkullMeta) item.getItemMeta();
+            
+            meta.setOwner(f.getString(path + ".owner"));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+    
     public ItemStack handleEnchantment(FileConfiguration f, ItemStack item,
-                                       String path) {
+            String path) {
         // get user-specified enchantments
         if (f.contains(path + ".enchantment.enchant1")) {
             String enchantPath = path + ".enchantment.enchant1";
