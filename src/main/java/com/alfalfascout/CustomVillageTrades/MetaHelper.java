@@ -249,19 +249,19 @@ public class MetaHelper {
                     YamlConfiguration.loadConfiguration(bookFile);
             b.setDefaults(plugin.defaultBook);
             
-            if (b.contains("author") && b.isString("author")) {
+            if (b.contains("author", true) && b.isString("author")) {
                 meta.setAuthor(b.getString("author"));
             }
             
-            if (b.contains("title") && b.isString("title")) {
+            if (b.contains("title", true) && b.isString("title")) {
                 meta.setTitle(b.getString("title"));
             }
             
-            if (b.contains("status") && b.isString("status")) {
+            if (b.contains("status", true) && b.isString("status")) {
                 meta.setGeneration(Generation.valueOf(b.getString("status")));
             }
             
-            if (b.contains("pages")) {
+            if (b.contains("pages", true)) {
                 List<String> pages = new ArrayList<String>();
                 int pageNum = 1;
                 String pagePath = "pages.page" + Integer.toString(pageNum);
