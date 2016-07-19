@@ -491,6 +491,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 break;
             case POTION:
             case SPLASH_POTION:
+            case LINGERING_POTION:
                 metaHelper.handlePotion(f, item, path);
                 break;
             case BANNER:
