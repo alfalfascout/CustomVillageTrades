@@ -7,10 +7,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.bukkit.Color;
 import org.bukkit.DyeColor;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -19,6 +22,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.BookMeta.Generation;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -280,6 +285,131 @@ public class MetaHelper {
         }
         
         return item;
+    }
+    
+    public ItemStack handleRocket(FileConfiguration f, ItemStack item,
+            String path) {
+        FireworkMeta meta = (FireworkMeta) item.getItemMeta();
+        if (f.contains(path + ".firework") && f.isString(path + ".firework")) {
+            File fireworkFile = new File(plugin.getDataFolder(),
+                    f.getString(path + ".firework"));
+            try {
+                fireworkFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileConfiguration b = 
+                    YamlConfiguration.loadConfiguration(fireworkFile);
+            
+            int power = 1;
+            List<FireworkEffect> effects = new ArrayList<FireworkEffect>();
+            
+            if (b.contains("power") && b.isInt("power") &&
+                    b.getInt("power") > -1) {
+                power = b.getInt("power");
+            }
+            
+            if (b.contains("effects") && b.isList("effects")) {
+                int effectNum = 1;
+                String effectPath = "effects.effect" + 
+                        Integer.toString(effectNum);
+                while (b.contains(effectPath)) {
+                    effects.add(buildFirework(
+                            b.getConfigurationSection(effectPath)));
+                    effectNum++;
+                    effectPath = "effects.effect" + 
+                            Integer.toString(effectNum);
+                }
+            }
+            
+            meta.addEffects(effects);
+            meta.setPower(power);
+            
+            item.setItemMeta(meta);
+        }
+        
+        return item;
+    }
+    
+    public ItemStack handleFireworkStar(FileConfiguration f, ItemStack item,
+            String path) {
+        FireworkEffectMeta meta = (FireworkEffectMeta) item.getItemMeta();
+        if (f.contains(path + ".firework") && f.isString(path + ".firework")) {
+            File fireworkFile = new File(plugin.getDataFolder(),
+                    f.getString(path + ".firework"));
+            try {
+                fireworkFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileConfiguration b = 
+                    YamlConfiguration.loadConfiguration(fireworkFile);
+            //b.setDefaults(plugin.defaultFireworkStar);
+            
+            meta.setEffect(buildFirework(b.getRoot()));
+            
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+    
+    public FireworkEffect buildFirework(ConfigurationSection f) {
+        FireworkEffect.Type type = FireworkEffect.Type.BALL;
+        List<Color> colors = new ArrayList<Color>();
+        List<Color> fades = new ArrayList<Color>();
+        boolean flicker = false;
+        boolean trail = false;
+        
+        if (f.contains("type") && f.isString("type")) {
+            type = FireworkEffect.Type.valueOf(
+                    f.getString("type").toUpperCase());
+            
+            if (type == null) {
+                plugin.getLogger().warning("No such firework type as " + 
+                        f.getString("type"));
+                type = FireworkEffect.Type.BALL;
+            }
+        }
+        
+        if (f.contains("flicker") && f.isBoolean("flicker")) {
+            flicker = f.getBoolean("flicker");
+        }
+        
+        if (f.contains("trail") && f.isBoolean("trail")) {
+            trail = f.getBoolean("trail");
+        }
+        
+        if (f.contains("colors") && f.isList("colors")) {
+            for (String color : f.getStringList("colors")) {
+                if (DyeColor.valueOf(color.toUpperCase()) != null) {
+                    colors.add(DyeColor.valueOf(
+                            color.toUpperCase()).getFireworkColor());
+                }
+            }
+        }
+        if (colors.isEmpty()) {
+            colors.add(Color.WHITE);
+            plugin.getLogger().info("empty color list");
+        }
+        
+        if (f.contains("fades") && f.isList("fades")) {
+            for (String fade : f.getStringList("fades")) {
+                if (DyeColor.valueOf(fade.toUpperCase()) != null) {
+                    fades.add(DyeColor.valueOf(
+                            fade.toUpperCase()).getColor());
+                }
+            }
+        }
+        
+        FireworkEffect.Builder builder = FireworkEffect.builder().with(type);
+        builder.flicker(flicker);
+        builder.trail(trail);
+        builder.withColor(colors);
+        if (!fades.isEmpty()) {
+            builder.withFade(fades);
+        }
+        
+        return builder.build();
     }
     
     public ItemStack handleEnchantment(FileConfiguration f, ItemStack item,

@@ -503,6 +503,13 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             case WRITTEN_BOOK:
             case BOOK_AND_QUILL:
                 metaHelper.handleBook(f, item, path);
+                break;
+            case FIREWORK_CHARGE:
+                metaHelper.handleFireworkStar(f, item, path);
+                break;
+            case FIREWORK:
+                metaHelper.handleRocket(f, item, path);
+                break;
             default:
                 break;
         }
