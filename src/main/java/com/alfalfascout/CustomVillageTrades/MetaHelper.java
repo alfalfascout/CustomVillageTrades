@@ -309,7 +309,7 @@ public class MetaHelper {
                 power = b.getInt("power");
             }
             
-            if (b.contains("effects") && b.isList("effects")) {
+            if (b.contains("effects")) {
                 int effectNum = 1;
                 String effectPath = "effects.effect" + 
                         Integer.toString(effectNum);
