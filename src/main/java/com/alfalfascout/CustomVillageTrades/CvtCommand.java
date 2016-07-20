@@ -138,9 +138,9 @@ public class CvtCommand implements CommandExecutor {
     
     private boolean reloadConfigs() {
         
+        CustomVillageTrades.trees.clear();
         plugin.reloadConfig();
-        plugin.populateWorlds();
-        plugin.loadTreesByWorld();
+        plugin.createFiles();
         plugin.getDefaultConfigs();
         
         return true;
