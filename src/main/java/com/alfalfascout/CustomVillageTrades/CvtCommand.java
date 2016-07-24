@@ -1,5 +1,6 @@
 package com.alfalfascout.CustomVillageTrades;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,8 +10,19 @@ import org.bukkit.inventory.ItemStack;
 
 public class CvtCommand implements CommandExecutor {
     private final CustomVillageTrades plugin;
-    private final String noPermission = "You don't have permission to do that.";
     private final MetaHelper metaHelper;
+    
+    private final String noPermission = "You don't have permission to do that.";
+    private final String commandList = 
+            ChatColor.GOLD + "/customvillagetrades utility command (/cvt)\n" +
+            "/cvt reload: " + ChatColor.WHITE + "Reloads all configs.\n" +
+            ChatColor.GOLD + "/cvt reset: " + ChatColor.WHITE + 
+            "Erases memory of villagers. (Requires confirmation)\n" +
+            ChatColor.GOLD + "/cvt make: " + ChatColor.WHITE + 
+            "Makes a yml file from a complex item in your hand.";
+    private final String makeUsage = 
+            ChatColor.GOLD + "/cvt make <banner|book|firework> " +
+            ChatColor.WHITE + "\nMakes a yml file from the item in your hand.";
     
     public CvtCommand(CustomVillageTrades plugin) {
         this.plugin = plugin;
@@ -46,9 +58,10 @@ public class CvtCommand implements CommandExecutor {
                         return true;
                     }
                     else {
-                        sender.sendMessage("This command will erase all " +
-                                "known villagers from memory. \n If you're " +
-                                "sure, do /cvt reset true");
+                        sender.sendMessage(ChatColor.YELLOW + 
+                                "This command will erase all " +
+                                "known villagers from memory. \n" +
+                                "If you're sure, do /cvt reset true");
                         return true;
                     }
                 }
@@ -61,8 +74,7 @@ public class CvtCommand implements CommandExecutor {
                     }
                     
                     if (!(args.length > 1)) {
-                        sender.sendMessage("/cvt make <banner|book> \nMakes " + 
-                                "a yml from the item in your hand.");
+                        sender.sendMessage(makeUsage);
                         return true;
                     }
                     
@@ -156,9 +168,13 @@ public class CvtCommand implements CommandExecutor {
                             return true;
                         }
                     }
+                    
+                    sender.sendMessage(makeUsage);
+                    return true;
                 }
             }
             
+            sender.sendMessage(commandList);
             return true;
         }
         
