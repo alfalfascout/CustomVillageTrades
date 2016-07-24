@@ -2,10 +2,7 @@ package com.alfalfascout.CustomVillageTrades;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -380,10 +377,18 @@ public class MetaHelper {
         }
         
         if (f.contains("colors") && f.isList("colors")) {
-            for (String color : f.getStringList("colors")) {
-                if (DyeColor.valueOf(color.toUpperCase()) != null) {
-                    colors.add(DyeColor.valueOf(
-                            color.toUpperCase()).getFireworkColor());
+            for (Object color : f.getList("colors")) {
+                if (color instanceof Color) {
+                    colors.add((Color) color);
+                }
+                else if (DyeColor.valueOf(
+                        ((String) color).toUpperCase()) != null) {
+                    colors.add(dyeToFirework(DyeColor.valueOf(
+                            ((String) color).toUpperCase())));
+                }
+                else {
+                    plugin.getLogger().info(
+                            "Unknown color " + color.toString());
                 }
             }
         }
@@ -392,11 +397,18 @@ public class MetaHelper {
             plugin.getLogger().info("empty color list");
         }
         
-        if (f.contains("fades") && f.isList("fades")) {
-            for (String fade : f.getStringList("fades")) {
-                if (DyeColor.valueOf(fade.toUpperCase()) != null) {
-                    fades.add(DyeColor.valueOf(
-                            fade.toUpperCase()).getColor());
+        if (f.contains("fade-colors") && f.isList("fade-colors")) {
+            for (Object fade : f.getList("fade-colors")) {
+                if (fade instanceof Color) {
+                    fades.add((Color) fade);
+                }
+                else if (DyeColor.valueOf(
+                        ((String) fade).toUpperCase()) != null) {
+                    fades.add(dyeToFirework(DyeColor.valueOf(
+                            ((String) fade).toUpperCase())));
+                }
+                else {
+                    plugin.getLogger().info("Unknown color " + fade.toString());
                 }
             }
         }
@@ -618,6 +630,66 @@ public class MetaHelper {
         }
     }
     
+    public void makeFireworkFile(ItemStack fwItem) {
+        if (!(fwItem.getType().equals(Material.FIREWORK) ||
+                fwItem.getType().equals(Material.FIREWORK_CHARGE))) {
+            plugin.getLogger().info("That's not a firework.");
+            return;
+        }
+        
+        Integer fwNo = new Integer(1);
+        String fwName = "firework" + fwNo.toString() + ".yml";
+        File fwFile = new File(plugin.getDataFolder(), fwName);
+        try {
+            while (!fwFile.createNewFile()) {
+                fwNo++;
+                fwName = "firework" + fwNo.toString() + ".yml";
+                fwFile = new File(plugin.getDataFolder(), fwName);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        FileConfiguration fwConf = new YamlConfiguration();
+        
+        if (fwItem.getType().equals(Material.FIREWORK)) {
+            FireworkMeta fwMeta = (FireworkMeta) fwItem.getItemMeta();
+            fwConf.set("power", fwMeta.getPower());
+            
+            List<FireworkEffect> fwEffects = fwMeta.getEffects();
+            int i = 1;
+            String path = "effects.effect" + Integer.toString(i);
+            for (FireworkEffect effect : fwEffects) {
+                recordFireworkEffect(fwConf, effect, path);
+                i += 1;
+                path = "effects.effect" + Integer.toString(i);
+            }
+        }
+        else {
+            FireworkEffectMeta fwMeta =
+                    (FireworkEffectMeta) fwItem.getItemMeta();
+            recordFireworkEffect(fwConf, fwMeta.getEffect(), "");
+        }
+        
+        try {
+            fwConf.save(fwFile);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void recordFireworkEffect(FileConfiguration fwConf,
+            FireworkEffect effect, String path) {
+        if (path.isEmpty()) {
+            fwConf.addDefaults(effect.serialize());
+            fwConf.options().copyDefaults(true);
+        }
+        else {
+            fwConf.set(path, effect.serialize());
+        }
+    }
+    
     public DyeColor getColorByDurability(short durability) {
         switch (durability) {
         case 0:
@@ -694,5 +766,58 @@ public class MetaHelper {
         default:
             return 15;
         }
+    }
+    
+    public org.bukkit.Color dyeToFirework(DyeColor dye) {
+        Color color = dye.getColor();
+        if (dye.equals(DyeColor.BLACK)) {
+            color = Color.fromRGB(30, 27, 27);
+        }
+        else if (dye.equals(DyeColor.RED)) {
+            color = Color.fromRGB(179, 49, 44);
+        }
+        else if (dye.equals(DyeColor.GREEN)) {
+            color = Color.fromRGB(59, 81, 26);
+        }
+        else if (dye.equals(DyeColor.BROWN)) {
+            color = Color.fromRGB(81, 48, 26);
+        }
+        else if (dye.equals(DyeColor.BLUE)) {
+            color = Color.fromRGB(37, 49, 146);
+        }
+        else if (dye.equals(DyeColor.PURPLE)) {
+            color = Color.fromRGB(123, 47, 190);
+        }
+        else if (dye.equals(DyeColor.CYAN)) {
+            color = Color.fromRGB(40, 118, 151);
+        }
+        else if (dye.equals(DyeColor.SILVER)) {
+            color = Color.fromRGB(171, 171, 171);
+        }
+        else if (dye.equals(DyeColor.GRAY)) {
+            color = Color.fromRGB(67, 67, 67);
+        }
+        else if (dye.equals(DyeColor.PINK)) {
+            color = Color.fromRGB(216, 129, 152);
+        }
+        else if (dye.equals(DyeColor.LIME)) {
+            color = Color.fromRGB(65, 205, 52);
+        }
+        else if (dye.equals(DyeColor.YELLOW)) {
+            color = Color.fromRGB(222, 207, 42);
+        }
+        else if (dye.equals(DyeColor.LIGHT_BLUE)) {
+            color = Color.fromRGB(102, 137, 211);
+        }
+        else if (dye.equals(DyeColor.MAGENTA)) {
+            color = Color.fromRGB(195, 84, 205);
+        }
+        else if (dye.equals(DyeColor.ORANGE)) {
+            color = Color.fromRGB(235, 136, 68);
+        }
+        else if (dye.equals(DyeColor.WHITE)) {
+            color = Color.fromRGB(240, 240, 240);
+        }
+        return color;
     }
 }

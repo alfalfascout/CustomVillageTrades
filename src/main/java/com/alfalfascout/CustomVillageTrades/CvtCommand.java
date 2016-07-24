@@ -127,6 +127,35 @@ public class CvtCommand implements CommandExecutor {
                             return true;
                         }
                     }
+                    
+                    if (args[1].equalsIgnoreCase("firework")) {
+                        if (!player.hasPermission(
+                                "customvillagetrades.make.firework")) {
+                            sender.sendMessage(noPermission);
+                            return true;
+                        }
+                        if (mainItem.equals(Material.FIREWORK) ||
+                                mainItem.equals(Material.FIREWORK_CHARGE)) {
+                            ItemStack firework =
+                                    player.getInventory().getItemInMainHand();
+                            metaHelper.makeFireworkFile(firework);
+                            sender.sendMessage("Firework file created.");
+                            return true;
+                        }
+                        else if (offItem.equals(Material.FIREWORK) ||
+                                offItem.equals(Material.FIREWORK_CHARGE)) {
+                            ItemStack firework =
+                                    player.getInventory().getItemInOffHand();
+                            metaHelper.makeFireworkFile(firework);
+                            sender.sendMessage("Firework file created.");
+                            return true;
+                        }
+                        else {
+                            sender.sendMessage("Hold the firework you want to " +
+                                    "make a yml from.");
+                            return true;
+                        }
+                    }
                 }
             }
             

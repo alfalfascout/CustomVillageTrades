@@ -18,11 +18,13 @@ permissions:
             customvillagetrades.reset: true
             customvillagetrades.make.banner: true
             customvillagetrades.make.book: true
+            customvillagetrades.make.firework: true
     customvillagetrades.make.*:
         description: Gives access to all CustomVillageTrades make commands.
         children:
             customvillagetrades.make.banner: true
             customvillagetrades.make.book: true
+            customvillagetrades.make.firework: true
     customvillagetrades.reload:
         description: Reloads worlds and trade trees from the config files.
         default: op
@@ -34,4 +36,7 @@ permissions:
         default: op
     customvillagetrades.make.book:
         description: Makes a book.yml from the player's held book.
+        default: op
+    customvillagetrades.make.firework:
+        description: Makes a firework.yml from the player's held firework.
         default: op
