@@ -243,8 +243,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     // when the player opens an unmet villager inventory, overwrite the villager
     @EventHandler
-    public void onOpenInventory(InventoryOpenEvent e) {
-        final InventoryHolder holder = 
+    public void onMeetVillager(InventoryOpenEvent e) {
+        final InventoryHolder holder =
                 e.getView().getTopInventory().getHolder();
         
         if (holder instanceof Villager) {
@@ -260,7 +260,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         getLogger().warning("Concurrent modification?");
                     }
                 }
-            }, 10);
+            }, 5);
         }
         
     }
@@ -659,7 +659,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             careerTier.career = "librarian";
         }
         else if (villager.getProfession().equals(Profession.PRIEST)) {
-            careerTier.career = "priest";
+            careerTier.career = "cleric";
         }
         CareerTier.saveVillager(careerTier, villager);
         
