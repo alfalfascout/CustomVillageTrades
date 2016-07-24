@@ -341,7 +341,6 @@ public class MetaHelper {
             }
             FileConfiguration b = 
                     YamlConfiguration.loadConfiguration(fireworkFile);
-            //b.setDefaults(plugin.defaultFireworkStar);
             
             meta.setEffect(buildFirework(b.getRoot()));
             
