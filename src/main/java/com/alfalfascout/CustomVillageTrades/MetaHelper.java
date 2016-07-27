@@ -506,8 +506,8 @@ public class MetaHelper {
                             ".enchantment.level should be an integer.");
                 }
             }
-    
-    
+            
+            
             if (f.contains(path + ".enchantment.allow_treasure")) {
                 try {
                     allowTreasure = f.getBoolean(path
@@ -519,9 +519,10 @@ public class MetaHelper {
                             "true or false.");
                 }
             }
-    
+            
             if (item.getType().equals(Material.ENCHANTED_BOOK) ||
                     item.getType().equals(Material.BOOK)) {
+                item.setType(Material.ENCHANTED_BOOK);
                 item = EnchantHelper.randomlyEnchantBook(plugin, item,
                         allowTreasure);
             } else {

@@ -113,10 +113,7 @@ public class EnchantHelper {
     
     // Returns an enchanted book roughly equivalent to a vanilla librarian's
     public static ItemStack randomlyEnchantBook(CustomVillageTrades instance, 
-            ItemStack book, boolean allowTreasure) {
-        ItemStack enchantedBook = new ItemStack(Material.ENCHANTED_BOOK);
-        enchantedBook.setItemMeta(book.getItemMeta());
-        
+            ItemStack enchantedBook, boolean allowTreasure) {
         Enchantment type = getRandomEnchantment(instance, enchantedBook);
         while (!(!treasure.contains(type) || allowTreasure)) {
             type = getRandomEnchantment(instance, enchantedBook);
