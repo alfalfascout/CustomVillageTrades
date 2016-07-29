@@ -30,10 +30,12 @@ import org.bukkit.potion.PotionType;
 
 public class MetaHelper {
     private static CustomVillageTrades plugin;
+    private static EnchantHelper enchHelper;
     static Random rand = new Random();
     
     public MetaHelper(CustomVillageTrades instance) {
         plugin = instance;
+        enchHelper = plugin.enchHelper;
     }
     
     public ItemStack getItemName(FileConfiguration f, ItemStack item,
@@ -439,8 +441,7 @@ public class MetaHelper {
                             enchantPath + ".type").toUpperCase();
                 
                     if (typeString.equals("random")) {
-                        specType = EnchantHelper.getRandomEnchantment(
-                                plugin, item);
+                        specType = enchHelper.getRandomEnchantment(item);
                     }
                     else {
                         specType = Enchantment.getByName(typeString);
@@ -472,8 +473,7 @@ public class MetaHelper {
             
                 if (specEnchant.canEnchantItem(item) ||
                         item.getType().equals(Material.ENCHANTED_BOOK)) {
-                    EnchantHelper.applyEnchantment(
-                            plugin, item, specEnchant);
+                    enchHelper.applyEnchantment(item, specEnchant);
                 }
                 else {
                     plugin.getLogger().warning("The enchantment " +
@@ -523,11 +523,9 @@ public class MetaHelper {
             if (item.getType().equals(Material.ENCHANTED_BOOK) ||
                     item.getType().equals(Material.BOOK)) {
                 item.setType(Material.ENCHANTED_BOOK);
-                item = EnchantHelper.randomlyEnchantBook(plugin, item,
-                        allowTreasure);
+                item = enchHelper.randomlyEnchantBook(item, allowTreasure);
             } else {
-                item = EnchantHelper.randomlyEnchant(plugin,
-                        item, level, allowTreasure);
+                item = enchHelper.randomlyEnchant(item, level, allowTreasure);
             }
         }
         return item;

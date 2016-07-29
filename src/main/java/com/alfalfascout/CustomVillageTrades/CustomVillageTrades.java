@@ -34,6 +34,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     private static FileConfiguration villagers;
     static Map<String,FileAndConfig> trees;
     FileConfiguration defaultBanner, defaultBook;
+    EnchantHelper enchHelper = new EnchantHelper(this);
     MetaHelper metaHelper = new MetaHelper(this);
     
     public void onEnable() {
@@ -420,6 +421,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
         int tradeNum = 1;
         
+        // for every trade, get result and ingredients
         while (f.contains(path + ".trade" + 
                 Integer.toString(tradeNum))) {
             String tradePath = path + ".trade" + Integer.toString(tradeNum);
@@ -439,8 +441,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 if (f.getString(
                         tradePath + ".ingredient1").equals("auto")) {
                     ingredients.add(
-                            EnchantHelper.appraiseEnchantedBook(
-                                    this, f, result));
+                            enchHelper.appraiseEnchantedBook(f, result));
                 }
                 
                 else {
@@ -530,6 +531,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return item;
     }
     
+    // Determine item's material
     public Material getItemType(FileConfiguration f, String path) {
         if (!f.contains(path + ".material") ||
                 !f.isString(path + ".material")) {
@@ -555,6 +557,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return itemType;
     }
     
+    // Determine how many in item stack
     public ItemStack getItemAmount(FileConfiguration f, ItemStack item,
                                   String path) {
         if (!f.isInt(path + ".min") || !f.isInt(path + ".max")) {
@@ -583,12 +586,13 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             }
             amount = item.getMaxStackSize();
         }
-    
+        
         item.setAmount(amount);
-    
+        
         return item;
     }
     
+    // Get data/damage value for item
     public ItemStack getItemData(FileConfiguration f, ItemStack item,
                                   String path) {
         if (!f.isInt(path + ".data")) {
