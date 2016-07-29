@@ -179,6 +179,31 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     // make sure all villager types, currency, and vanilla bool are in the tree
     public void populateTree(FileAndConfig tree) {
+        if (!tree.conf.contains("currency", true)) {
+            tree.conf.createSection("currency");
+            tree.conf.set("currency", "emerald");
+        }
+        
+        if (!tree.conf.contains("allow_vanilla_trades", true)) {
+            tree.conf.createSection("allow_vanilla_trades");
+            tree.conf.set("allow_vanilla_trades", "false");
+        }
+        
+        if (!tree.conf.contains("override_vanilla_acquire", true)) {
+            tree.conf.createSection("override_vanilla_acquire");
+            tree.conf.set("override_vanilla_acquire", "false");
+        }
+        
+        if (!tree.conf.contains("acquire", true)) {
+            tree.conf.createSection("acquire");
+            tree.conf.set("acquire", 7);
+        }
+        
+        if (!tree.conf.contains("replenish", true)) {
+            tree.conf.createSection("replenish");
+            tree.conf.set("replenish", "default");
+        }
+        
         List<String> villagerList = Arrays.asList("librarian", "cleric",
                 "farmer", "fletcher", "fisherman", "shepherd", "butcher",
                 "leatherworker", "armorer", "toolsmith", "weaponsmith");
@@ -193,15 +218,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             tree.conf.set("all_villagers", "none");
         }
         
-        if (!tree.conf.contains("currency", true)) {
-            tree.conf.createSection("currency");
-            tree.conf.set("currency", "emerald");
-        }
-        
-        if (!tree.conf.contains("allow_vanilla_trades", true)) {
-            tree.conf.createSection("allow_vanilla_trades");
-            tree.conf.set("allow_vanilla_trades", "false");
-        }
         tree.save();
     }
     
@@ -535,7 +551,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     public Material getItemType(FileConfiguration f, String path) {
         if (!f.contains(path + ".material") ||
                 !f.isString(path + ".material")) {
-            getLogger().info(path + " needs a valid material.");
+            getLogger().warning(path + " needs a valid material.");
             f.set(path + ".material", "stone");
         }
         
@@ -596,7 +612,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     public ItemStack getItemData(FileConfiguration f, ItemStack item,
                                   String path) {
         if (!f.isInt(path + ".data")) {
-            getLogger().info(path + ".data should be a number.");
+            getLogger().warning(path + ".data should be a positive number.");
         }
         item.setDurability(
                 (short)f.getInt(path + ".data"));
