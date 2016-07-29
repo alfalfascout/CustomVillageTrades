@@ -1,3 +1,5 @@
+acquire: 7
+replenish: default
 currency: emerald
 farmer:
     tier1:

@@ -288,18 +288,18 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     public void onTradeReplenish(VillagerReplenishTradeEvent e) {
         final Villager villager = e.getEntity();
         String villagerId = "id" + villager.getUniqueId().toString();
+        String world = villager.getEyeLocation().getWorld().getName();
+        FileConfiguration file = getTree(world).conf;
         long lastNew = villagers.getLong(villagerId + ".lastnew");
+        
+        int replenish = rand.nextInt(6) + rand.nextInt(6) + 2;
+        if (getIntOrMinMax(file, "replenish") != -1) {
+            replenish = getIntOrMinMax(file, "replenish");
+        }
+        e.setBonus(replenish);
         
         if (villagers.getBoolean(villagerId + ".lastvanilla")) {
             if (lastNew + (long)2000 < System.currentTimeMillis()) {
-                String world = villager.getEyeLocation().getWorld().getName();
-                FileConfiguration file;
-                if (trees.containsKey(world)) {
-                    file = getTree(world).conf;
-                }
-                else {
-                    return;
-                }
                 
                 CareerTier career = new CareerTier(this);
                 career.getLastCareerTier(villager);
@@ -381,12 +381,19 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         getTree("vanilla").conf, path);
                 
                 // correct the currency of the vanilla trades
-                if (!getCurrency(f).equals(Material.EMERALD)) {
-                    for (MerchantRecipe vanillaTrade : vanillaTrades) {
+                for (MerchantRecipe vanillaTrade : vanillaTrades) {
+                    if (!getCurrency(f).equals(Material.EMERALD)) {
                         MerchantRecipe newVanillaTrade = 
                                 changeVanillaCurrency(f, vanillaTrade);
                         vanillaTrades.set(vanillaTrades.indexOf(vanillaTrade),
                                 newVanillaTrade);
+                    }
+                    if (f.isBoolean("override_vanilla_acquire") && 
+                            f.getBoolean("override_vanilla_acquire")) {
+                        if (getIntOrMinMax(f, "acquire") != -1) {
+                            vanillaTrade.setMaxUses(
+                                    getIntOrMinMax(f, "acquire"));
+                        }
                     }
                 }
                 newTrades.addAll(vanillaTrades);
@@ -405,9 +412,15 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         if (!getAllowVanilla(f)) {
             e.setCancelled(true);
         }
-        else if (!getCurrency(f).equals(Material.EMERALD)) {
-            recipe = changeVanillaCurrency(f, recipe);
-            e.setRecipe(recipe);
+        else {
+            if (!getCurrency(f).equals(Material.EMERALD)) {
+                recipe = changeVanillaCurrency(f, recipe);
+                e.setRecipe(recipe);
+            }
+            if (f.getBoolean("override_vanilla_acquire")) {
+                recipe.setMaxUses(getUsesAcquired(f, "acquire"));
+                e.setRecipe(recipe);
+            }
         }
         
         String villagerId = "id" + villager.getUniqueId().toString();
@@ -432,7 +445,14 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         // if this tier is marked default, get pseudo vanilla trades instead
         if (f.isString(path) &&
                 f.getString(path).equals("default")) {
-            f = getTree("vanilla").conf;
+            recipes = getTradesInTier(getTree("vanilla").conf, path);
+            if (f.isBoolean("override_vanilla_acquire") && 
+                    f.getBoolean("override_vanilla_acquire")) {
+                for (MerchantRecipe recipe : recipes) {
+                    recipe.setUses(getUsesAcquired(f, "acquire"));
+                }
+            }
+            return recipes;
         }
         
         int tradeNum = 1;
@@ -476,7 +496,8 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                         tradePath + ".ingredient2")));
             }
             
-            recipes.add(new MerchantRecipe(result, 7));
+            recipes.add(new MerchantRecipe(result, 
+                    getUsesAcquired(f, tradePath + ".acquire")));
             
             for (ItemStack ingredient : ingredients) {
                 recipes.get(recipes.size() - 1).addIngredient(ingredient);
@@ -486,6 +507,41 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         }
         
         return recipes;
+    }
+    
+    // Get max uses for new trade, either by custom or global value
+    public int getUsesAcquired(FileConfiguration f, String path) {
+        if (getIntOrMinMax(f, path) != -1) {
+            return getIntOrMinMax(f, path);
+        }
+        else {
+            if (path.equals("acquire")) {
+                return 7;
+            }
+            else {
+                return getUsesAcquired(f, "acquire");
+            }
+        }
+    }
+    
+    // Get int at path or random int between path.min & path.max as appropriate
+    public int getIntOrMinMax(FileConfiguration f, String path) {
+        if (f.isInt(path) && f.getInt(path) > -1) {
+            return f.getInt(path);
+        }
+        else if (f.isInt(path + ".min") && f.isInt(path + ".max")) {
+            int min = f.getInt(path + ".min");
+            int max = f.getInt(path + ".max");
+            
+            if (min > max || max < 1 || min < 0) {
+                getLogger().warning("Invalid max/min values at " + 
+                        path);
+            }
+            else {
+                return rand.nextInt(1 + max - min) + min;
+            }
+        }
+        return -1;
     }
     
     // build individual ItemStack at the given path of the given world file
@@ -576,24 +632,11 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     // Determine how many in item stack
     public ItemStack getItemAmount(FileConfiguration f, ItemStack item,
                                   String path) {
-        if (!f.isInt(path + ".min") || !f.isInt(path + ".max")) {
-            getLogger().info("Min and max should both be integers at " + path);
-            return item;
+        int amount = getIntOrMinMax(f, path);
+        if (amount < 1) {
+            amount = 1;
         }
         
-        int min = f.getInt(path + ".min");
-        if (min < 0) {
-            getLogger().warning("min must be greater than zero at " + path);
-            min = 1;
-        }
-    
-        int max = 1 + f.getInt(path + ".max") - min;
-        if ((max + min) < min) {
-            getLogger().warning("max must at least as great as min at " + path);
-            max = 1;
-        }
-    
-        int amount = rand.nextInt(max) + min;
         if (amount > item.getMaxStackSize()) {
             if (!f.equals("vanilla")) {
                 getLogger().warning("The maximum stack size for " +
