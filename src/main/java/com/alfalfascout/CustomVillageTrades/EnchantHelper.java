@@ -16,17 +16,17 @@ public class EnchantHelper {
     private static Random rand = new Random();
     private static List<Material> enchantableItems = Arrays.asList(
             Material.FISHING_ROD,
-            Material.CARROT_STICK, Material.SHEARS, Material.BOOK, Material.BOW,
+            Material.CARROT_ON_A_STICK, Material.SHEARS, Material.BOOK, Material.BOW,
             Material.FLINT_AND_STEEL, Material.SHIELD, Material.ELYTRA,
-            Material.WOOD_AXE, Material.WOOD_HOE, Material.WOOD_PICKAXE, 
-            Material.WOOD_SPADE, Material.WOOD_SWORD, Material.STONE_AXE,
-            Material.STONE_HOE, Material.STONE_PICKAXE, Material.STONE_SPADE, 
+            Material.WOODEN_AXE, Material.WOODEN_HOE, Material.WOODEN_PICKAXE, 
+            Material.WOODEN_SHOVEL, Material.WOODEN_SWORD, Material.STONE_AXE,
+            Material.STONE_HOE, Material.STONE_PICKAXE, Material.STONE_SHOVEL, 
             Material.STONE_SWORD, Material.IRON_AXE, Material.IRON_HOE,
-            Material.IRON_PICKAXE, Material.IRON_SPADE, Material.IRON_SWORD,
-            Material.GOLD_AXE, Material.GOLD_HOE, Material.GOLD_PICKAXE, 
-            Material.GOLD_SPADE, Material.GOLD_SWORD, Material.DIAMOND_AXE, 
+            Material.IRON_PICKAXE, Material.IRON_SHOVEL, Material.IRON_SWORD,
+            Material.GOLDEN_AXE, Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, 
+            Material.GOLDEN_SHOVEL, Material.GOLDEN_SWORD, Material.DIAMOND_AXE, 
             Material.DIAMOND_HOE, Material.DIAMOND_PICKAXE, 
-            Material.DIAMOND_SPADE,
+            Material.DIAMOND_SHOVEL,
             Material.DIAMOND_SWORD, Material.LEATHER_BOOTS, 
             Material.LEATHER_LEGGINGS,
             Material.LEATHER_CHESTPLATE, Material.LEATHER_HELMET,
@@ -37,28 +37,28 @@ public class EnchantHelper {
             Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET,
             Material.CHAINMAIL_BOOTS, Material.CHAINMAIL_LEGGINGS,
             Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_HELMET,
-            Material.GOLD_BOOTS, Material.GOLD_LEGGINGS,
-            Material.GOLD_CHESTPLATE, Material.GOLD_HELMET,
+            Material.GOLDEN_BOOTS, Material.GOLDEN_LEGGINGS,
+            Material.GOLDEN_CHESTPLATE, Material.GOLDEN_HELMET,
             Material.ENCHANTED_BOOK);
     
     private static List<Material> enchantability_25 = Arrays.asList(
-            Material.GOLD_BOOTS, Material.GOLD_LEGGINGS, 
-            Material.GOLD_CHESTPLATE, Material.GOLD_HELMET);
+            Material.GOLDEN_BOOTS, Material.GOLDEN_LEGGINGS, 
+            Material.GOLDEN_CHESTPLATE, Material.GOLDEN_HELMET);
     
     private static List<Material> enchantability_22 = Arrays.asList(
-            Material.GOLD_AXE,
-            Material.GOLD_HOE, Material.GOLD_PICKAXE, Material.GOLD_SPADE, 
-            Material.GOLD_SWORD);
+            Material.GOLDEN_AXE,
+            Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, Material.GOLDEN_SHOVEL, 
+            Material.GOLDEN_SWORD);
     
     private static List<Material> enchantability_15 = Arrays.asList(
-            Material.WOOD_AXE, Material.WOOD_HOE, Material.WOOD_PICKAXE, 
-            Material.WOOD_SPADE, Material.WOOD_SWORD, Material.LEATHER_BOOTS, 
+            Material.WOODEN_AXE, Material.WOODEN_HOE, Material.WOODEN_PICKAXE, 
+            Material.WOODEN_SHOVEL, Material.WOODEN_SWORD, Material.LEATHER_BOOTS, 
             Material.LEATHER_LEGGINGS, Material.LEATHER_CHESTPLATE, 
             Material.LEATHER_HELMET);
     
     private static List<Material> enchantability_14 = Arrays.asList(
             Material.IRON_AXE, 
-            Material.IRON_HOE, Material.IRON_PICKAXE, Material.IRON_SPADE, 
+            Material.IRON_HOE, Material.IRON_PICKAXE, Material.IRON_SHOVEL, 
             Material.IRON_SWORD);
     
     private static List<Material> enchantability_12 = Arrays.asList(
@@ -69,7 +69,7 @@ public class EnchantHelper {
     private static List<Material> enchantability_10 = Arrays.asList(
             Material.DIAMOND_AXE, 
             Material.DIAMOND_HOE, Material.DIAMOND_PICKAXE, 
-            Material.DIAMOND_SPADE,
+            Material.DIAMOND_SHOVEL,
             Material.DIAMOND_SWORD, Material.DIAMOND_BOOTS, 
             Material.DIAMOND_LEGGINGS,
             Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET);
@@ -81,11 +81,11 @@ public class EnchantHelper {
     
     private static List<Material> enchantability_5 = Arrays.asList(
             Material.STONE_AXE,
-            Material.STONE_HOE, Material.STONE_PICKAXE, Material.STONE_SPADE, 
+            Material.STONE_HOE, Material.STONE_PICKAXE, Material.STONE_SHOVEL, 
             Material.STONE_SWORD);
     
     private static List<Enchantment> treasure = Arrays.asList(
-            Enchantment.FROST_WALKER, Enchantment.MENDING);
+            Enchantment.FROST_WALKER, Enchantment.MENDING, Enchantment.BINDING_CURSE, Enchantment.VANISHING_CURSE);
     
     public EnchantHelper(CustomVillageTrades instance) {
         plugin = instance;
@@ -121,7 +121,7 @@ public class EnchantHelper {
         int level = rand.nextInt(type.getMaxLevel()) + 1;
         
         LeveledEnchantment enchantment = 
-                new LeveledEnchantment(plugin, type.hashCode(), level);
+                new LeveledEnchantment(plugin, type.getKey().toString(), level);
         
         enchantedBook = applyEnchantment(enchantedBook, enchantment);
         
@@ -235,7 +235,7 @@ public class EnchantHelper {
                     if (level >= (1 + i * 10) && level <= ((1 + i * 10) + 5)) {
                         
                         enchants.add(new LeveledEnchantment(plugin,
-                                enchantment.hashCode(), i));
+                                enchantment.getKey().toString(), i));
                     }
                 }
             }

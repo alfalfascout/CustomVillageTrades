@@ -1,18 +1,41 @@
 currency: apple
 allow_vanilla_trades: true
-farmer: none
-fletcher: none
-fisherman: none
-shepherd: none
-butcher: default
-leatherworker: default
+nitwit_gets_trades: false
 armorer: default
-toolsmith: default
+butcher: default
+cartographer:
+    tier1:
+        trade1:
+            result:
+                material: white_banner
+                banner: default_banner.yml
+            ingredient1:
+                material: currency
+        trade2:
+            result:
+                material: filled_map
+                type: monument
+            ingredient1:
+                material: currency
+cleric:
+    tier1:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: ink
+                min: 12
+                max: 18
+                data: 15
+farmer: none
+fisherman: none
+fletcher: none
+leatherworker: default
 librarian:
     tier2:
         trade1:
             result:
-                material: book_and_quill
+                material: writable_book
             ingredient1:
                 material: paper
                 min: 3
@@ -32,26 +55,18 @@ librarian:
                         type: oxygen
                         level: random
             ingredient1:
-                material: book_and_quill
+                material: writable_book
             ingredient2:
                 material: currency
                 min: 5
                 max: 19
-cleric:
+shepherd: none
+tool_smith: default
+weapon_smith:
     tier1:
         trade1:
             result:
-                material: currency
-            ingredient1:
-                material: ink_sack
-                min: 12
-                max: 18
-                data: 15
-weaponsmith:
-    tier1:
-        trade1:
-            result:
-                material: gold_sword
+                material: golden_sword
                 data: 8
                 name: Old Reliable
                 lore: Doesn't look very reliable.
@@ -67,4 +82,4 @@ all_villagers:
         name: appaloosa
         lore: not a real horse,just an apple
       ingredient1:
-        material: clay_brick
+        material: brick

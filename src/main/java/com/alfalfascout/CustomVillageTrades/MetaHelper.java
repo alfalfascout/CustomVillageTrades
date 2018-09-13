@@ -2,36 +2,30 @@ package com.alfalfascout.CustomVillageTrades;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.List;
+import java.util.logging.Logger;
 
+import org.bukkit.*;
 import org.bukkit.Color;
-import org.bukkit.DyeColor;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.inventory.meta.BookMeta.Generation;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.SpawnEgg;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 public class MetaHelper {
     private static CustomVillageTrades plugin;
     private static EnchantHelper enchHelper;
-    static Random rand = new Random();
+    private static Random rand = new Random();
     
     public MetaHelper(CustomVillageTrades instance) {
         plugin = instance;
@@ -68,27 +62,6 @@ public class MetaHelper {
             meta.setLore(Arrays.asList("a string"));
             item.setItemMeta(meta);
         }
-        return item;
-    }
-    
-    public ItemStack handleSpawnEgg(FileConfiguration f, ItemStack item,
-                                    String path) {
-        EntityType spawnEggType = EntityType.PIG;
-        if (f.contains(path + ".spawns")) {
-            try {
-                spawnEggType = EntityType.valueOf(
-                        f.getString(path + ".spawns").toUpperCase());
-            }
-            catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                plugin.getLogger().warning(f.getString(path + ".spawns") +
-                        " is not a valid entity type for spawn eggs.");
-                spawnEggType = EntityType.PIG;
-            }
-        }
-    
-        SpawnEgg spawnEgg = new SpawnEgg(spawnEggType);
-        item = spawnEgg.toItemStack(1);
         return item;
     }
     
@@ -163,25 +136,6 @@ public class MetaHelper {
             FileConfiguration b = 
                     YamlConfiguration.loadConfiguration(bannerFile);
             b.setDefaults(plugin.defaultBanner);
-
-            // base color
-            if (!b.contains("base.color", true)) {
-                b.set("base.color", "white");
-                try {
-                    b.save(bannerFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            DyeColor base = DyeColor.valueOf(
-                    b.getString("base.color").toUpperCase());
-            if (base == null) {
-                plugin.getLogger().info("Invalid base color.");
-                base = DyeColor.WHITE;
-            }
-            meta.setBaseColor(base);
-            item.setDurability(getDurabilityByDyeColor(base));
             
             // patterns
             int patternNum = 1;
@@ -232,7 +186,7 @@ public class MetaHelper {
         if (f.contains(path + ".owner") && f.isString(path + ".owner")) {
             SkullMeta meta = (SkullMeta) item.getItemMeta();
             
-            meta.setOwner(f.getString(path + ".owner"));
+            meta.setOwningPlayer(f.getOfflinePlayer(path + ".owner"));
             item.setItemMeta(meta);
         }
         return item;
@@ -469,7 +423,7 @@ public class MetaHelper {
                 }
             
                 LeveledEnchantment specEnchant = new LeveledEnchantment(
-                        plugin, specType.hashCode(), specLevel);
+                        plugin, specType.getKey().toString(), specLevel);
             
                 if (specEnchant.canEnchantItem(item) ||
                         item.getType().equals(Material.ENCHANTED_BOOK)) {
@@ -530,9 +484,35 @@ public class MetaHelper {
         }
         return item;
     }
+
+    public ItemStack handleFilledMap(FileConfiguration f, ItemStack mapItem, String path, Location villagerLocation) {
+        //MapMeta mapMeta = (MapMeta) mapItem.getItemMeta();
+        //get user-specified map type
+        if (f.contains(path + ".type")) {
+            plugin.getLogger().info(villagerLocation.toString() + f.getString(path + ".type"));
+
+            try {
+                mapItem = (ItemStack) createExplorerMap(villagerLocation.getWorld(), villagerLocation, "Monument");
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return mapItem;
+    }
+
+
     
     public void makeBannerFile(ItemStack bannerItem) {
-        if (!bannerItem.getType().equals(Material.BANNER)) {
+        if (!bannerItem.getType().toString().contains("BANNER")) {
             plugin.getLogger().info("That's not a banner.");
             return;
         }
@@ -553,10 +533,7 @@ public class MetaHelper {
         
         FileConfiguration bannerConf = new YamlConfiguration();
         
-        DyeColor baseColor = bannerMeta.getBaseColor();
-        if (baseColor == null) {
-            baseColor = getColorByDurability(bannerItem.getDurability());
-        }
+        DyeColor baseColor = DyeColor.valueOf(bannerItem.getType().toString().split("_BANNER")[0]);
         bannerConf.set("base.color", baseColor.name());
         
         int pNum = 1;
@@ -577,7 +554,7 @@ public class MetaHelper {
     
     public void makeBookFile(ItemStack bookItem) {
         if (!(bookItem.getType().equals(Material.WRITTEN_BOOK) ||
-                bookItem.getType().equals(Material.BOOK_AND_QUILL))) {
+                bookItem.getType().equals(Material.WRITABLE_BOOK))) {
             plugin.getLogger().info("That's not a book.");
             return;
         }
@@ -629,8 +606,8 @@ public class MetaHelper {
     }
     
     public void makeFireworkFile(ItemStack fwItem) {
-        if (!(fwItem.getType().equals(Material.FIREWORK) ||
-                fwItem.getType().equals(Material.FIREWORK_CHARGE))) {
+        if (!(fwItem.getType().equals(Material.FIREWORK_ROCKET) ||
+                fwItem.getType().equals(Material.FIREWORK_STAR))) {
             plugin.getLogger().info("That's not a firework.");
             return;
         }
@@ -650,7 +627,7 @@ public class MetaHelper {
         
         FileConfiguration fwConf = new YamlConfiguration();
         
-        if (fwItem.getType().equals(Material.FIREWORK)) {
+        if (fwItem.getType().equals(Material.FIREWORK_ROCKET)) {
             FireworkMeta fwMeta = (FireworkMeta) fwItem.getItemMeta();
             fwConf.set("power", fwMeta.getPower());
             
@@ -679,7 +656,7 @@ public class MetaHelper {
     
     public void recordFireworkEffect(FileConfiguration fwConf,
             FireworkEffect effect, String path) {
-        if (path.isEmpty()) {
+        if (path.equals("")) {
             fwConf.addDefaults(effect.serialize());
             fwConf.options().copyDefaults(true);
         }
@@ -705,7 +682,7 @@ public class MetaHelper {
         case 6:
             return DyeColor.CYAN;
         case 7:
-            return DyeColor.SILVER;
+            return DyeColor.LIGHT_GRAY;
         case 8:
             return DyeColor.GRAY;
         case 9:
@@ -743,7 +720,7 @@ public class MetaHelper {
             return 5;
         case CYAN:
             return 6;
-        case SILVER:
+        case LIGHT_GRAY:
             return 7;
         case GRAY:
             return 8;
@@ -789,7 +766,7 @@ public class MetaHelper {
         else if (dye.equals(DyeColor.CYAN)) {
             color = Color.fromRGB(40, 118, 151);
         }
-        else if (dye.equals(DyeColor.SILVER)) {
+        else if (dye.equals(DyeColor.LIGHT_GRAY)) {
             color = Color.fromRGB(171, 171, 171);
         }
         else if (dye.equals(DyeColor.GRAY)) {
@@ -818,4 +795,60 @@ public class MetaHelper {
         }
         return color;
     }
+
+    // Code by Ugleh on spigotmc.org forums to search for nearby structures and generate map, partly modified to support more structure icons
+    private Object createExplorerMap(World world, Location loc, String structureType) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
+        Object structurePosition = getStructure(loc, structureType);
+        int structureX = (int) getNMSClass("BlockPosition").getMethod("getX").invoke(structurePosition);
+        int structureZ = (int) getNMSClass("BlockPosition").getMethod("getZ").invoke(structurePosition);
+
+        Method getHandle = loc.getWorld().getClass().getMethod("getHandle");
+        Object nmsWorld = getHandle.invoke(loc.getWorld());
+
+        String structureIconType = structureType.toUpperCase();
+        if (!(Arrays.asList("PLAYER", "FRAME","RED_MARKER","BLUE_MARKER","TARGET_X","TARGET_POINT","PLAYER_OFF_LIMITS","MANSION","MONUMENT").contains(structureIconType))) {
+            structureIconType = "RED_X";
+        }
+
+        Object itemStack = getNMSClass("ItemWorldMap").getDeclaredMethod("a", new Class[] { getNMSClass("World"), int.class, int.class, byte.class, boolean.class, boolean.class }).invoke(getNMSClass("ItemWorldMap"), nmsWorld, structureX, structureZ, (byte)2, true, true);
+        getNMSClass("ItemWorldMap").getDeclaredMethod("a", new Class[] { getNMSClass("World"), getNMSClass("ItemStack") }).invoke(getNMSClass("ItemWorldMap"), nmsWorld, itemStack);
+        Object icon = getNMSClass("MapIcon$Type").getMethod("valueOf", new Class[] {String.class}).invoke(getNMSClass("MapIcon$Type"), structureIconType);
+        getNMSClass("WorldMap").getMethod("a", new Class[] {getNMSClass("ItemStack"), getNMSClass("BlockPosition"),  String.class, getNMSClass("MapIcon$Type")}).invoke(getNMSClass("WorldMap"), itemStack, structurePosition, "+", icon);
+
+        return getBukkitClass("inventory.CraftItemStack").getMethod("asBukkitCopy", new Class[] {getNMSClass("ItemStack")}).invoke(getBukkitClass("inventory.CraftItemStack"), itemStack);
+    }
+
+
+
+
+    private Object getStructure(Location l, String structure) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
+        Method getHandle = l.getWorld().getClass().getMethod("getHandle");
+        Object nmsWorld = getHandle.invoke(l.getWorld());
+        Object blockPosition = nmsWorld.getClass().getMethod("a", new Class[] { String.class, getNMSClass("BlockPosition"), int.class, boolean.class }).invoke(nmsWorld, structure,getBlockPosition(l), 100,false);
+        return blockPosition;
+    }
+
+    private Class<?> getNMSClass(String nmsClassString) throws ClassNotFoundException {
+        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + ".";
+        String name = "net.minecraft.server." + version + nmsClassString;
+        Class<?> nmsClass = Class.forName(name);
+        return nmsClass;
+    }
+
+    private Class<?> getBukkitClass(String nmsClassString) throws ClassNotFoundException {
+        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + ".";
+        String name = "org.bukkit.craftbukkit." + version + nmsClassString;
+        Class<?> nmsClass = Class.forName(name);
+        return nmsClass;
+    }
+
+    private Object getBlockPosition(Location loc) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException{
+        Class<?> nmsBlockPosition = getNMSClass("BlockPosition");
+        Object nmsBlockPositionInstance = nmsBlockPosition
+                .getConstructor(new Class[] { Double.TYPE, Double.TYPE, Double.TYPE })
+                .newInstance(new Object[] { loc.getX(), loc.getY(), loc.getZ() });
+        return nmsBlockPositionInstance;
+    }
+    // end code by Ugleh
+
 }

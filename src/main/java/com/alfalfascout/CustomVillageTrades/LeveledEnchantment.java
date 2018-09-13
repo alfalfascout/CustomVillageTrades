@@ -9,10 +9,10 @@ public class LeveledEnchantment extends EnchantmentWrapper {
     private int level;
     private int weight;
     
-    public LeveledEnchantment(CustomVillageTrades instance, int id, int level) {
-        super(id);
+    public LeveledEnchantment(CustomVillageTrades instance, String name, int level) {
+        super(name);
         this.level = level;
-        this.setWeight(id);
+        this.setWeight(this.getEnchantment().getKey().toString());
         plugin = instance;
     }
     
@@ -24,34 +24,31 @@ public class LeveledEnchantment extends EnchantmentWrapper {
         return this.weight;
     }
 
-    public void setWeight(int id) {
-        switch (id) {
-            case 0: case 16: case 32: case 48:
-                this.weight = 10;
-                break;
-            case 1: case 2: case 4: case 17: case 18: case 19:
-            case 34:
-                this.weight = 5;
-                break;
-            case 3: case 5: case 6: case 8: case 9: case 20:
-            case 21: case 35: case 49: case 50: case 61:
-            case 62: case 70:
-                this.weight = 2;
-                break;
-            case 7: case 33: case 51:
-                this.weight = 1;
-                break;
-            default:
-                this.weight = 2;
+    public LeveledEnchantment setWeight(String name) {
+        if (name == "PROTECTION_ENVIRONMENTAL" || name == "DAMAGE_ALL" || name == "DIG_SPEED"
+            || name == "ARROW_DAMAGE") {
+            this.weight = 10;
         }
+        if (name == "PROTECTION_FIRE" || name == "PROTECTION_FALL" || name == "PROTECTION_PROJECTILE" ||
+                name == "DAMAGE_UNDEAD" || name == "DAMAGE_ARTHROPODS" || name == "KNOCKBACK" ||
+                name == "DURABILITY") {
+            this.weight = 5;
+        }
+        if (name == "THORNS" || name == "SILK_TOUCH" || name == "ARROWS_INFINITE" || name == "BINDING_CURSE" ||
+                name == "VANISHING_CURSE") {
+            this.weight = 1;
+        }
+        else {
+            this.weight = 2;
+        }
+        return this;
     }
     
     // get one (weighted) random leveled enchantment from a list
     public static LeveledEnchantment getRandomLeveledEnchant(
             CustomVillageTrades instance, 
             List<LeveledEnchantment> list, Random rand) {
-        LeveledEnchantment chosenEnchant = 
-                new LeveledEnchantment(instance, 0, 0);
+        LeveledEnchantment chosenEnchant;
         int totalWeight = 0;
         int i = 0;
         int j;
@@ -72,6 +69,6 @@ public class LeveledEnchantment extends EnchantmentWrapper {
                 return chosenEnchant;
             }
         }
-        return (LeveledEnchantment)null;
+        return null;
     }
 }

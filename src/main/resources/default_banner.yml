@@ -1,5 +1,4 @@
-base:
-    color: white
+material: white_banner
 pattern1:
     type: stripe_top
     color: blue

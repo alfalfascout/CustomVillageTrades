@@ -1,6 +1,7 @@
 name: CustomVillageTrades
 main: com.alfalfascout.CustomVillageTrades.CustomVillageTrades
-version: 0.11.0
+version: 0.12.0
+api-version: 1.13.1
 description: "Changes villagers' trade lists to a customizable list."
 
 commands:

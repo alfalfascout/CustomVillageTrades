@@ -1,400 +1,6 @@
 acquire: 7
 replenish: default
 currency: emerald
-farmer:
-    tier1:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: wheat
-                min: 18
-                max: 22
-        trade2:
-            result:
-                material: currency
-            ingredient1:
-                material: potato_item
-                min: 15
-                max: 19
-        trade3:
-            result:
-                material: currency
-            ingredient1:
-                material: carrot_item
-                min: 15
-                max: 19
-        trade4:
-            result:
-                material: bread
-                min: 2
-                max: 4
-            ingredient1:
-                material: currency
-    tier2:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: pumpkin
-                min: 8
-                max: 13
-        trade2:
-            result:
-                material: pumpkin_pie
-                min: 2
-                max: 3
-            ingredient1:
-                material: currency
-    tier3:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: melon_block
-                min: 7
-                max: 12
-        trade2:
-            result:
-                material: apple
-                min: 5
-                max: 5
-            ingredient1:
-                material: currency
-    tier4:
-        trade1:
-            result:
-                material: cookie
-                min: 6
-                max: 6
-            ingredient1:
-                material: currency
-        trade2:
-            result:
-                material: cake
-            ingredient1:
-                material: currency
-
-fisherman:
-    tier1:
-        trade1:
-            result:
-                material: cooked_fish
-                min: 6
-                max: 6
-                data: 0
-            ingredient1:
-                material: raw_fish
-                min: 6
-                max: 6
-                data: 0
-            ingredient2:
-                material: currency
-        trade2:
-            result:
-                material: currency
-            ingredient1:
-                material: string
-                min: 15
-                max: 20
-        trade3:
-            result:
-                material: currency
-            ingredient1:
-                material: coal
-                min: 16
-                max: 24
-    tier2:
-        trade1:
-            result:
-                material: fishing_rod
-                enchantment:
-                    level: 19
-                    allow_treasure: false
-            ingredient1:
-                material: currency
-                min: 7
-                max: 8
-
-fletcher:
-    tier1:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: string
-                min: 15
-                max: 20
-        trade2:
-            result:
-                material: arrow
-                min: 8
-                max: 12
-            ingredient1:
-                material: currency
-    tier2:
-        trade1:
-            result:
-                material: flint
-                min: 6
-                max: 10
-            ingredient1:
-                material: gravel
-                min: 10
-                max: 10
-            ingredient2:
-                material: currency
-        trade2:
-            result:
-                material: bow
-            ingredient1:
-                material: currency
-                min: 2
-                max: 3
-
-shepherd:
-    tier1:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: wool
-                min: 16
-                max: 22
-                data: 0
-        trade2:
-            result:
-                material: shears
-            ingredient1:
-                material: currency
-                min: 3
-                max: 4
-    tier2:
-        trade1:
-            result:
-                material: wool
-                data: 0
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-    tier2:
-        trade1:
-            result:
-                material: wool
-                data: 0
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade2:
-            result:
-                material: wool
-                data: 1
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade3:
-            result:
-                material: wool
-                data: 2
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade4:
-            result:
-                material: wool
-                data: 3
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade5:
-            result:
-                material: wool
-                data: 4
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade6:
-            result:
-                material: wool
-                data: 5
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade7:
-            result:
-                material: wool
-                data: 6
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade8:
-            result:
-                material: wool
-                data: 7
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade9:
-            result:
-                material: wool
-                data: 8
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade10:
-            result:
-                material: wool
-                data: 9
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade11:
-            result:
-                material: wool
-                data: 10
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade12:
-            result:
-                material: wool
-                data: 11
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade13:
-            result:
-                material: wool
-                data: 12
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade14:
-            result:
-                material: wool
-                data: 13
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade15:
-            result:
-                material: wool
-                data: 14
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-        trade16:
-            result:
-                material: wool
-                data: 15
-            ingredient1:
-                material: currency
-                min: 1
-                max: 2
-
-librarian:
-    tier1:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: paper
-                min: 24
-                max: 36
-        trade2:
-            result:
-                material: enchanted_book
-                enchantment:
-                    allow_treasure: true
-            ingredient1: auto
-            ingredient2:
-                material: book
-    tier2:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: book
-                min: 8
-                max: 10
-        trade2:
-            result:
-                material: compass
-            ingredient1:
-                material: currency
-                min: 10
-                max: 12
-        trade3:
-            result:
-                material: bookshelf
-            ingredient1:
-                material: currency
-                min: 3
-                max: 4
-    tier3:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: written_book
-                min: 2
-                max: 2
-        trade2:
-            result:
-                material: watch
-            ingredient1:
-                material: currency
-                min: 10
-                max: 12
-        trade3:
-            result:
-                material: glass
-                min: 3
-                max: 5
-            ingredient1:
-                material: currency
-    tier4:
-        trade1:
-            result:
-                material: enchanted_book
-                enchantment:
-                    allow_treasure: true
-            ingredient1: auto
-            ingredient2:
-                material: book
-    tier5:
-        trade1:
-            result:
-                material: enchanted_book
-                enchantment:
-                    allow_treasure: true
-            ingredient1: auto
-            ingredient2:
-                material: book
-    tier6:
-        trade1:
-            result:
-                material: name_tag
-            ingredient1:
-                material: currency
-                min: 20
-                max: 22
 
 armorer:
     tier1:
@@ -475,6 +81,308 @@ armorer:
                 min: 11
                 max: 15
 
+butcher:
+    tier1:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: porkchop
+                min: 14
+                max: 18
+        trade2:
+            result:
+                material: currency
+            ingredient1:
+                material: chicken
+                min: 14
+                max: 18
+    tier2:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: coal
+                min: 16
+                max: 24
+        trade2:
+            result:
+                material: cooked_porkchop
+                min: 5
+                max: 7
+            ingredient1:
+                material: currency
+        trade3:
+            result:
+                material: cooked_chicken
+                min: 6
+                max: 8
+            ingredient1:
+                material: currency
+
+cartographer:
+    tier1:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: paper
+                min: 24
+                max: 36
+    tier2:
+        trade1:
+            result:
+                material: compass
+            ingredient1:
+                material: currency
+    tier3:
+        trade1:
+            result:
+                material: map
+            ingredient1:
+                material: currency
+                min: 7
+                max: 11
+    tier4:
+        trade1:
+            result:
+                material: filled_map
+                type: monument
+            ingredient1:
+                material: compass
+            ingredient2:
+                material: currency
+                min: 12
+                max: 20
+        trade2:
+            result:
+                material: filled_map
+                type: mansion
+            ingredient1:
+                material: compass
+            ingredient2:
+                material: currency
+                min: 16
+                max: 28
+
+cleric:
+    tier1:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: rotten_flesh
+                min: 36
+                max: 40
+        trade2:
+            result:
+                material: currency
+            ingredient1:
+                material: gold_ingot
+                min: 8
+                max: 10
+    tier2:
+        trade1:
+            result:
+                material: redstone
+                min: 1
+                max: 4
+            ingredient1:
+                material: currency
+        trade2:
+            result:
+                material: ink_sac
+                min: 1
+                max: 2
+                data: 4
+            ingredient1:
+                material: currency
+    tier3:
+        trade1:
+            result:
+                material: glowstone
+                min: 1
+                max: 3
+            ingredient1:
+                material: currency
+        trade2:
+            result:
+                material: ender_pearl
+            ingredient1:
+                material: currency
+                min: 4
+                max: 7
+    tier4:
+        trade1:
+            result:
+                material: experience_bottle
+            ingredient1:
+                material: currency
+                min: 3
+                max: 11
+
+farmer:
+    tier1:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: wheat
+                min: 18
+                max: 22
+        trade2:
+            result:
+                material: currency
+            ingredient1:
+                material: potato
+                min: 15
+                max: 19
+        trade3:
+            result:
+                material: currency
+            ingredient1:
+                material: carrot
+                min: 15
+                max: 19
+        trade4:
+            result:
+                material: bread
+                min: 2
+                max: 4
+            ingredient1:
+                material: currency
+    tier2:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: pumpkin
+                min: 8
+                max: 13
+        trade2:
+            result:
+                material: pumpkin_pie
+                min: 2
+                max: 3
+            ingredient1:
+                material: currency
+    tier3:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: melon
+                min: 7
+                max: 12
+        trade2:
+            result:
+                material: apple
+                min: 5
+                max: 5
+            ingredient1:
+                material: currency
+    tier4:
+        trade1:
+            result:
+                material: cookie
+                min: 6
+                max: 6
+            ingredient1:
+                material: currency
+        trade2:
+            result:
+                material: cake
+            ingredient1:
+                material: currency
+
+fisherman:
+    tier1:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: string
+                min: 15
+                max: 20
+
+        trade2:
+            result:
+                material: currency
+            ingredient1:
+                material: coal
+                min: 16
+                max: 24
+        trade3:
+            result:
+                material: cooked_cod
+                min: 6
+                max: 6
+            ingredient1:
+                material: raw_cod
+                min: 6
+                max: 6
+            ingredient2:
+                material: currency
+        trade4:
+            result:
+                material: cooked_salmon
+                min: 6
+                max: 6
+            ingredient1:
+                material: raw_salmon
+                min: 6
+                max: 6
+            ingredient2:
+                material: currency
+
+    tier2:
+        trade1:
+            result:
+                material: fishing_rod
+                enchantment:
+                    level: 19
+                    allow_treasure: false
+            ingredient1:
+                material: currency
+                min: 7
+                max: 8
+
+fletcher:
+    tier1:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: string
+                min: 15
+                max: 20
+        trade2:
+            result:
+                material: arrow
+                min: 8
+                max: 12
+            ingredient1:
+                material: currency
+    tier2:
+        trade1:
+            result:
+                material: flint
+                min: 6
+                max: 10
+            ingredient1:
+                material: gravel
+                min: 10
+                max: 10
+            ingredient2:
+                material: currency
+        trade2:
+            result:
+                material: bow
+            ingredient1:
+                material: currency
+                min: 2
+                max: 3
+
 leatherworker:
     tier1:
         trade1:
@@ -511,23 +419,228 @@ leatherworker:
                 min: 8
                 max: 10
 
-butcher:
+librarian:
     tier1:
         trade1:
             result:
                 material: currency
             ingredient1:
-                material: pork
-                min: 14
-                max: 18
+                material: paper
+                min: 24
+                max: 36
         trade2:
+            result:
+                material: enchanted_book
+                enchantment:
+                    allow_treasure: true
+            ingredient1: auto
+            ingredient2:
+                material: book
+    tier2:
+        trade1:
             result:
                 material: currency
             ingredient1:
-                material: raw_chicken
-                min: 14
-                max: 18
+                material: book
+                min: 8
+                max: 10
+        trade2:
+            result:
+                material: compass
+            ingredient1:
+                material: currency
+                min: 10
+                max: 12
+        trade3:
+            result:
+                material: bookshelf
+            ingredient1:
+                material: currency
+                min: 3
+                max: 4
+    tier3:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: written_book
+                min: 2
+                max: 2
+        trade2:
+            result:
+                material: clock
+            ingredient1:
+                material: currency
+                min: 10
+                max: 12
+        trade3:
+            result:
+                material: glass
+                min: 3
+                max: 5
+            ingredient1:
+                material: currency
+    tier4:
+        trade1:
+            result:
+                material: enchanted_book
+                enchantment:
+                    allow_treasure: true
+            ingredient1: auto
+            ingredient2:
+                material: book
+    tier5:
+        trade1:
+            result:
+                material: enchanted_book
+                enchantment:
+                    allow_treasure: true
+            ingredient1: auto
+            ingredient2:
+                material: book
+    tier6:
+        trade1:
+            result:
+                material: name_tag
+            ingredient1:
+                material: currency
+                min: 20
+                max: 22
+
+nitwit: none
+
+shepherd:
+    tier1:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: white_wool
+                min: 16
+                max: 22
+        trade2:
+            result:
+                material: shears
+            ingredient1:
+                material: currency
+                min: 3
+                max: 4
     tier2:
+        trade1:
+            result:
+                material: white_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade2:
+            result:
+                material: orange_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade3:
+            result:
+                material: magenta_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade4:
+            result:
+                material: light_blue_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade5:
+            result:
+                material: yellow_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade6:
+            result:
+                material: lime_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade7:
+            result:
+                material: pink_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade8:
+            result:
+                material: gray_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade9:
+            result:
+                material: light_gray_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade10:
+            result:
+                material: cyan_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade11:
+            result:
+                material: purple_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade12:
+            result:
+                material: blue_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade13:
+            result:
+                material: brown_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade14:
+            result:
+                material: green_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade15:
+            result:
+                material: red_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+        trade16:
+            result:
+                material: black_wool
+            ingredient1:
+                material: currency
+                min: 1
+                max: 2
+
+tool_smith:
+    tier1:
         trade1:
             result:
                 material: currency
@@ -537,20 +650,52 @@ butcher:
                 max: 24
         trade2:
             result:
-                material: grilled_pork
+                material: iron_shovel
+                enchantment:
+                    level: 19
+                    allow_treasure: false
+            ingredient1:
+                material: currency
                 min: 5
                 max: 7
-            ingredient1:
-                material: currency
-        trade3:
+    tier2:
+        trade1:
             result:
-                material: cooked_chicken
-                min: 6
-                max: 8
+                material: currency
+            ingredient1:
+                material: iron_ingot
+                min: 7
+                max: 9
+        trade2:
+            result:
+                material: iron_pickaxe
+                enchantment:
+                    level: 19
+                    allow_treasure: true
             ingredient1:
                 material: currency
+                min: 9
+                max: 11
+    tier3:
+        trade1:
+            result:
+                material: currency
+            ingredient1:
+                material: diamond
+                min: 3
+                max: 4
+        trade2:
+            result:
+                material: diamond_pickaxe
+                enchantment:
+                    level: 19
+                    allow_treasure: true
+            ingredient1:
+                material: currency
+                min: 12
+                max: 15
 
-weaponsmith:
+weapon_smith:
     tier1:
         trade1:
             result:
@@ -613,114 +758,3 @@ weaponsmith:
                 min: 9
                 max: 12
 
-toolsmith:
-    tier1:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: coal
-                min: 16
-                max: 24
-        trade2:
-            result:
-                material: iron_spade
-                enchantment:
-                    level: 19
-                    allow_treasure: false
-            ingredient1:
-                material: currency
-                min: 5
-                max: 7
-    tier2:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: iron_ingot
-                min: 7
-                max: 9
-        trade2:
-            result:
-                material: iron_pickaxe
-                enchantment:
-                    level: 19
-                    allow_treasure: true
-            ingredient1:
-                material: currency
-                min: 9
-                max: 11
-    tier3:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: diamond
-                min: 3
-                max: 4
-        trade2:
-            result:
-                material: diamond_pickaxe
-                enchantment:
-                    level: 19
-                    allow_treasure: true
-            ingredient1:
-                material: currency
-                min: 12
-                max: 15
-
-cleric:
-    tier1:
-        trade1:
-            result:
-                material: currency
-            ingredient1:
-                material: rotten_flesh
-                min: 36
-                max: 40
-        trade2:
-            result:
-                material: currency
-            ingredient1:
-                material: gold_ingot
-                min: 8
-                max: 10
-    tier2:
-        trade1:
-            result:
-                material: redstone
-                min: 1
-                max: 4
-            ingredient1:
-                material: currency
-        trade2:
-            result:
-                material: ink_sack
-                min: 1
-                max: 2
-                data: 4
-            ingredient1:
-                material: currency
-    tier3:
-        trade1:
-            result:
-                material: glowstone
-                min: 1
-                max: 3
-            ingredient1:
-                material: currency
-        trade2:
-            result:
-                material: ender_pearl
-            ingredient1:
-                material: currency
-                min: 4
-                max: 7
-    tier4:
-        trade1:
-            result:
-                material: exp_bottle
-            ingredient1:
-                material: currency
-                min: 3
-                max: 11
