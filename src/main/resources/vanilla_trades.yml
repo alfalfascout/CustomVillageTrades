@@ -191,10 +191,9 @@ cleric:
                 material: currency
         trade2:
             result:
-                material: ink_sac
+                material: lapis_lazuli
                 min: 1
                 max: 2
-                data: 4
             ingredient1:
                 material: currency
     tier3:

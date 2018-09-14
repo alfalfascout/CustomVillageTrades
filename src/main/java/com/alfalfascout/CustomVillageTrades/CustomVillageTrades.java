@@ -34,11 +34,11 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     FileConfiguration defaultBanner, defaultBook;
     EnchantHelper enchHelper = new EnchantHelper(this);
     MetaHelper metaHelper = new MetaHelper(this);
+    VillagerHelper villagerHelper = new VillagerHelper(this);
     
     public void onEnable() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
-        this.getCommand("customvillagetrades").setExecutor(
-                new CvtCommand(this));
+        this.getCommand("customvillagetrades").setExecutor(new CvtCommand(this));
         createFiles();
         getDefaultConfigs();
     }
@@ -202,9 +202,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             tree.conf.set("replenish", "default");
         }
         
-        List<String> villagerList = Arrays.asList("librarian", "cleric",
-                "farmer", "fletcher", "fisherman", "shepherd", "butcher",
-                "leatherworker", "armorer", "toolsmith", "weaponsmith");
+        List<String> villagerList = Arrays.asList("armorer", "butcher", "cartographer",
+                "cleric", "farmer", "fisherman", "fletcher", "leatherworker",
+                "librarian", "shepherd", "tool_smith", "weapon_smith");
         for (String villagerType : villagerList) {
             if (!tree.conf.contains(villagerType, true)) {
                 tree.conf.createSection(villagerType);
@@ -280,8 +280,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
     }
     
-    // when the villager replenishes their trades, give them new ones
-    // if they're out of vanilla trades
+    // when the villager replenishes their trades, give them new ones if they're out of vanilla trades
     @EventHandler
     public void onTradeReplenish(VillagerReplenishTradeEvent e) {
         final Villager villager = e.getEntity();
@@ -289,6 +288,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         String world = villager.getEyeLocation().getWorld().getName();
         FileConfiguration file = getTree(world).conf;
         long lastNew = villagers.getLong(villagerId + ".lastnew");
+        int villagerTier;
         
         int replenish = rand.nextInt(6) + rand.nextInt(6) + 2;
         if (getIntOrMinMax(file, "replenish") != -1) {
@@ -298,17 +298,15 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
         if (villagers.getBoolean(villagerId + ".lastvanilla")) {
             if (lastNew + (long)2000 < System.currentTimeMillis()) {
-                
-                CareerTier career = new CareerTier(this);
-                career.getLastCareerTier(villager);
-                career.tier += 1;
+
+                villagerTier = villagers.getInt(villagerId + ".tier") + 1;
                 
                 final List<MerchantRecipe> newTrades = 
                         new ArrayList<MerchantRecipe>();
                 
-                String tradePath = villager.getCareer().name().toLowerCase() + ".tier" + career.tier;
+                String tradePath = villager.getCareer().name().toLowerCase() + ".tier" + villagerTier;
                 newTrades.addAll(getTradesInTier(file, tradePath, villager));
-                tradePath = "all_villagers.tier" + career.tier;
+                tradePath = "all_villagers.tier" + villagerTier;
                 newTrades.addAll(getTradesInTier(file, tradePath, villager));
                 
                 // delay adding trades to avoid concurrent modification
@@ -327,7 +325,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                     }, 5);
                 }
                 
-                CareerTier.saveVillager(career, villager);
+                villagerHelper.saveVillager(villager, villagerTier);
             }
         }
         
@@ -343,6 +341,9 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     public void onTradeAcquire(VillagerAcquireTradeEvent e) {
         Villager villager = e.getEntity();
         String world = villager.getEyeLocation().getWorld().getName();
+
+        // this is a new trade, so it being the last vanilla trade is probably false
+        villagerHelper.saveVillager(villager, false);
         
         if (trees.containsKey(world)) {
             FileConfiguration file = getTree(world).conf;
@@ -357,33 +358,36 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     public void handleTrade(FileConfiguration f, VillagerAcquireTradeEvent e) {
         Villager villager = e.getEntity();
         MerchantRecipe recipe = e.getRecipe();
-        
-        // hacky way to get the villager's career until spigot adds that in
-        // FIXME: 8 Sep 2018 Modify function with awareness of new spigot career endpoints?
-        CareerTier trade = new CareerTier(this);
-        trade.setCareerTier(villager);
+        if (!villagerHelper.lastTradeInTier(villager, recipe)) {
+            return;
+        }
+
+        int villagerTier =  villagerHelper.getCareerTier(villager, recipe);
         
         // get all the trades appropriate for villager's career and tier
-        if (trade.tier > 0) {
+        if (villagerTier > 0) {
             // specific trades listed in world's trade file
             String path = villager.getCareer().name().toLowerCase() + ".tier" +
-                        Integer.toString(trade.tier);
+                        Integer.toString(villagerTier);
             List<MerchantRecipe> newTrades = getTradesInTier(f, path, villager);
             
-            // pseudo vanilla trades if career set to "default"
+            // pseudo vanilla trades if career's tree is set to "default"
             if (f.getString(villager.getCareer().name().toLowerCase()).equals("default") &&
                     !f.getBoolean("allow_vanilla_trades")) {
                 List<MerchantRecipe> vanillaTrades = getTradesInTier(
                         getTree("vanilla").conf, path, villager);
-                
-                // correct the currency of the vanilla trades
+
                 for (MerchantRecipe vanillaTrade : vanillaTrades) {
+
+                    // correct the currency of the vanilla trades
                     if (!getCurrency(f).equals(Material.EMERALD)) {
                         MerchantRecipe newVanillaTrade = 
                                 changeVanillaCurrency(f, vanillaTrade);
                         vanillaTrades.set(vanillaTrades.indexOf(vanillaTrade),
                                 newVanillaTrade);
                     }
+
+                    // set how many uses each trade will have
                     if (f.isBoolean("override_vanilla_acquire") && 
                             f.getBoolean("override_vanilla_acquire")) {
                         if (getIntOrMinMax(f, "acquire") != -1) {
@@ -393,10 +397,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                     }
                 }
                 newTrades.addAll(vanillaTrades);
-            }
+            } // end pseudo vanilla trades
             
-            // trades given to all villagers of this tier
-            path = "all_villagers.tier" + Integer.toString(trade.tier);
+            // get trades given to all villagers of this tier
+            path = "all_villagers.tier" + Integer.toString(villagerTier);
             if (f.contains(path)) {
                 newTrades.addAll(getTradesInTier(f, path, villager));
             }
@@ -404,15 +408,18 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             // add all the above trades to the villager
             addRecipes(villager, newTrades);
         }
-        
+
+        // cancel vanilla trades if config forbids them
         if (!getAllowVanilla(f)) {
             e.setCancelled(true);
         }
         else {
+            // if config allows real vanilla trades, update their currency to match config
             if (!getCurrency(f).equals(Material.EMERALD)) {
                 recipe = changeVanillaCurrency(f, recipe);
                 e.setRecipe(recipe);
             }
+            // and change how many uses they have, if config overrides
             if (f.getBoolean("override_vanilla_acquire")) {
                 recipe.setMaxUses(getUsesAcquired(f, "acquire"));
                 e.setRecipe(recipe);
@@ -421,6 +428,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         
         String villagerId = "id" + villager.getUniqueId().toString();
         villagers.set(villagerId + ".lastnew", System.currentTimeMillis());
+        saveVillagers();
     }
     
     // add recipes to the end of the villager's recipe list
@@ -491,10 +499,10 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
                 ingredients.add(new ItemStack(getItemInTrade(f, 
                         tradePath + ".ingredient2", villager)));
             }
-            
+
+            // assemble the recipe and add it to the recipe list
             recipes.add(new MerchantRecipe(result, 
                     getUsesAcquired(f, tradePath + ".acquire")));
-            
             for (ItemStack ingredient : ingredients) {
                 recipes.get(recipes.size() - 1).addIngredient(ingredient);
             }
@@ -546,8 +554,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         ItemStack item = new ItemStack(itemType);
 
         if (itemType == Material.FILLED_MAP) {
-            metaHelper.handleFilledMap(f, item, path, villager.getEyeLocation());
-            return item;
+            return metaHelper.handleFilledMap(f, item, path, villager.getEyeLocation());
         }
         
         if (f.contains(path + ".name")) {
@@ -605,10 +612,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
             getItemAmount(f, item, path);
         }
         
-        if (f.contains(path + ".data")) {
-            getItemData(f, item, path);
-        }
-        
         if (f.contains(path + ".enchantment")) {
             metaHelper.handleEnchantment(f, item, path);
         }
@@ -664,18 +667,6 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         return item;
     }
     
-    // Get data/damage value for item
-    public ItemStack getItemData(FileConfiguration f, ItemStack item,
-                                  String path) {
-        if (!f.isInt(path + ".data")) {
-            getLogger().warning(path + ".data should be a positive number.");
-        }
-        item.setDurability(
-                (short)f.getInt(path + ".data"));
-        
-        return item;
-    }
-    
     // given a recipe where the currency is emeralds,
     // change it to the currency listed in the config for that world
     public MerchantRecipe changeVanillaCurrency(FileConfiguration f,
@@ -711,28 +702,14 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
     
     // if we haven't met the villager, overwrite their trades
     public void handleMeetVillager(Villager villager) {
-        CareerTier villagerCareer = new CareerTier(this);
-        
-        // handle legacy configs?
-        if (villagers.contains("id" +
-                Integer.toString(villager.getEntityId()))) {
-            villagerCareer.loadVillager(villager);
-        }
-        
         if (getConfig().getBoolean("overwrite_unknown_villagers") && 
-                !villagers.contains("id" +
-                        (villager).getUniqueId().toString())) {
+                !villagerHelper.knownVillager(villager)) {
             overwriteTrades(villager);
         }
     }
     
     // overwrites this villager with their first trade tier
     public void overwriteTrades(Villager villager) {
-        CareerTier careerTier = new CareerTier(this);
-        careerTier.tier = 1;
-
-        CareerTier.saveVillager(careerTier, villager);
-        
         String world = villager.getEyeLocation().getWorld().getName();
         FileConfiguration file = getTree(world).conf;
         
@@ -761,81 +738,7 @@ public class CustomVillageTrades extends JavaPlugin implements Listener {
         villager.setRecipes(trades);
     }
 
-    // Determines whether the trade passed in matches the last trade in the villager's vanilla trade list
-    public boolean LastVanillaTrade(Villager villager, MerchantRecipe recipe) {
-        Material result = recipe.getResult().getType();
-        switch (villager.getCareer()) {
-            case ARMORER:
-                return result == Material.CHAINMAIL_CHESTPLATE;
-            case BUTCHER:
-                return result == Material.COOKED_CHICKEN;
-            case CARTOGRAPHER:
-                return result == Material.FILLED_MAP ||
-                        villagers.getInt(villager.getUniqueId() + ".tier") > 3;
-            case CLERIC:
-                return result == Material.EXPERIENCE_BOTTLE;
-            case FARMER:
-                return result == Material.CAKE;
-            case FISHERMAN:
-                return result == Material.FISHING_ROD;
-            case FLETCHER:
-                return result == Material.BOW;
-            case LEATHERWORKER:
-                return result == Material.SADDLE;
-            case LIBRARIAN:
-                return result == Material.NAME_TAG;
-            case NITWIT:
-                return true;
-            case SHEPHERD:
-                return result == Material.BLACK_WOOL;
-            case TOOL_SMITH:
-                return result == Material.DIAMOND_PICKAXE;
-            case WEAPON_SMITH:
-                return result == Material.DIAMOND_AXE;
-        }
-        return true;
-    }
-    
-    public boolean LastTradeInTier(Villager villager, MerchantRecipe recipe) {
-        if (LastVanillaTrade(villager, recipe))
-        {
-            return true;
-        }
-        Material result = recipe.getResult().getType();
-        Material ingredient = recipe.getResult().getType();
-        switch (villager.getCareer()) {
-            case ARMORER:
-                return result == Material.IRON_HELMET || result == Material.IRON_CHESTPLATE ||
-                        result == Material.DIAMOND_CHESTPLATE;
-            case BUTCHER:
-                return ingredient == Material.CHICKEN;
-            case CARTOGRAPHER:
-                return result == Material.EMERALD || result == Material.MAP;
-            case CLERIC:
-                return ingredient == Material.GOLD_INGOT || result == Material.LAPIS_LAZULI ||
-                        result == Material.ENDER_PEARL;
-            case FARMER:
-                return result == Material.BREAD || result == Material.PUMPKIN_PIE || result == Material.APPLE;
-            case FISHERMAN:
-                return ingredient == Material.COAL;
-            case FLETCHER:
-                return result == Material.ARROW;
-            case LEATHERWORKER:
-                return ingredient == Material.EMERALD;
-            case LIBRARIAN:
-                return result == Material.GLASS || result == Material.ENCHANTED_BOOK || result == Material.BOOKSHELF;
-            case NITWIT:
-                return true;
-            case SHEPHERD:
-                return result == Material.SHEARS;
-            case TOOL_SMITH:
-                return result == Material.IRON_SHOVEL || result == Material.IRON_PICKAXE;
-            case WEAPON_SMITH:
-                return result == Material.IRON_AXE || result == Material.IRON_SWORD;
-        }
 
-        return true;
-    }
 
 
 

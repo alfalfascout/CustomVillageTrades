@@ -504,6 +504,8 @@ public class MetaHelper {
             } catch (InstantiationException e) {
                 e.printStackTrace();
             }
+
+            // FIXME: 14 Sep 2018 Name the map with the proper localized string unless told otherwise
         }
 
         return mapItem;
@@ -532,9 +534,8 @@ public class MetaHelper {
         }
         
         FileConfiguration bannerConf = new YamlConfiguration();
-        
-        DyeColor baseColor = DyeColor.valueOf(bannerItem.getType().toString().split("_BANNER")[0]);
-        bannerConf.set("base.color", baseColor.name());
+
+        bannerConf.set("material", bannerItem.getType().name().toLowerCase());
         
         int pNum = 1;
         String pPath = "pattern" + Integer.toString(pNum);
@@ -664,85 +665,7 @@ public class MetaHelper {
             fwConf.set(path, effect.serialize());
         }
     }
-    
-    public DyeColor getColorByDurability(short durability) {
-        switch (durability) {
-        case 0:
-            return DyeColor.BLACK;
-        case 1:
-            return DyeColor.RED;
-        case 2:
-            return DyeColor.GREEN;
-        case 3:
-            return DyeColor.BROWN;
-        case 4:
-            return DyeColor.BLUE;
-        case 5:
-            return DyeColor.PURPLE;
-        case 6:
-            return DyeColor.CYAN;
-        case 7:
-            return DyeColor.LIGHT_GRAY;
-        case 8:
-            return DyeColor.GRAY;
-        case 9:
-            return DyeColor.PINK;
-        case 10:
-            return DyeColor.LIME;
-        case 11:
-            return DyeColor.YELLOW;
-        case 12:
-            return DyeColor.LIGHT_BLUE;
-        case 13:
-            return DyeColor.MAGENTA;
-        case 14:
-            return DyeColor.ORANGE;
-        case 15:
-            return DyeColor.WHITE;
-        default:
-            return DyeColor.WHITE;
-        }
-    }
-    
-    public short getDurabilityByDyeColor(DyeColor color) {
-        switch (color) {
-        case BLACK:
-            return 0;
-        case RED:
-            return 1;
-        case GREEN:
-            return 2;
-        case BROWN:
-            return 3;
-        case BLUE:
-            return 4;
-        case PURPLE:
-            return 5;
-        case CYAN:
-            return 6;
-        case LIGHT_GRAY:
-            return 7;
-        case GRAY:
-            return 8;
-        case PINK:
-            return 9;
-        case LIME:
-            return 10;
-        case YELLOW:
-            return 11;
-        case LIGHT_BLUE:
-            return 12;
-        case MAGENTA:
-            return 13;
-        case ORANGE:
-            return 14;
-        case WHITE:
-            return 15;
-        default:
-            return 15;
-        }
-    }
-    
+
     public org.bukkit.Color dyeToFirework(DyeColor dye) {
         Color color = dye.getColor();
         if (dye.equals(DyeColor.BLACK)) {
@@ -806,7 +729,10 @@ public class MetaHelper {
         Object nmsWorld = getHandle.invoke(loc.getWorld());
 
         String structureIconType = structureType.toUpperCase();
-        if (!(Arrays.asList("PLAYER", "FRAME","RED_MARKER","BLUE_MARKER","TARGET_X","TARGET_POINT","PLAYER_OFF_LIMITS","MANSION","MONUMENT").contains(structureIconType))) {
+        if (!(Arrays.asList("PLAYER", "FRAME","RED_MARKER","BLUE_MARKER","TARGET_X","TARGET_POINT","PLAYER_OFF_LIMITS",
+                "MANSION","MONUMENT","RED_X","BANNER_BLACK","BANNER_BLUE","BANNER_BROWN","BANNER_CYAN","BANNER_GRAY",
+                "BANNER_GREEN","BANNER_LIGHT_BLUE","BANNER_LIGHT_GRAY","BANNER_LIME","BANNER_MAGENTA","BANNER_ORANGE",
+                "BANNER_PINK","BANNER_PURPLE","BANNER_RED","BANNER_WHITE","BANNER_YELLOW").contains(structureIconType))) {
             structureIconType = "RED_X";
         }
 
@@ -849,6 +775,6 @@ public class MetaHelper {
                 .newInstance(new Object[] { loc.getX(), loc.getY(), loc.getZ() });
         return nmsBlockPositionInstance;
     }
-    // end code by Ugleh
+    // end code by Ugleh, thanks Ugleh!!
 
 }
