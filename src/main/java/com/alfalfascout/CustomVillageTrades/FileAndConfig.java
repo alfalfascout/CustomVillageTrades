@@ -11,18 +11,18 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 // helper class for loading and saving config files 
 public class FileAndConfig {
-    public File file;
-    public Reader reader;
+    private File file;
+    private Reader reader;
     public FileConfiguration conf;
     
     public FileAndConfig(File f, FileConfiguration c) {
         this.file = f;
         this.conf = c;
-        this.reader = (Reader)null;
+        this.reader = null;
     }
     
     public FileAndConfig(Reader r) {
-        this.file = (File)null;
+        this.file = null;
         this.reader = r;
         this.conf = YamlConfiguration.loadConfiguration(r);
     }
@@ -30,7 +30,7 @@ public class FileAndConfig {
     public FileAndConfig(File f) {
         this.file = f;
         this.conf = YamlConfiguration.loadConfiguration(f);
-        this.reader = (Reader)null;
+        this.reader = null;
     }
     
     public String toString() {
@@ -45,10 +45,9 @@ public class FileAndConfig {
         }
         
         String confString = " FileConfiguration: " + this.conf.toString() + ".";
-        
-        String repr = "FileAndConfig Object. " + 
+
+        return "FileAndConfig Object. " +
                 fileString + readerString + confString;
-        return repr;
     }
     
     // if this config has a file, save it. otherwise, ignore it

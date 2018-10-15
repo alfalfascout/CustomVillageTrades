@@ -317,7 +317,7 @@ fisherman:
                 min: 6
                 max: 6
             ingredient1:
-                material: raw_cod
+                material: cod
                 min: 6
                 max: 6
             ingredient2:
@@ -328,7 +328,7 @@ fisherman:
                 min: 6
                 max: 6
             ingredient1:
-                material: raw_salmon
+                material: salmon
                 min: 6
                 max: 6
             ingredient2:

@@ -11,10 +11,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.enchantments.*;
 
-public class EnchantHelper {
-    static CustomVillageTrades plugin;
-    private static Random rand = new Random();
-    private static List<Material> enchantableItems = Arrays.asList(
+class EnchantHelper {
+    private static CustomVillageTrades plugin;
+    private static final Random rand = new Random();
+    /*private static final List<Material> enchantableItems = Arrays.asList(
             Material.FISHING_ROD,
             Material.CARROT_ON_A_STICK, Material.SHEARS, Material.BOOK, Material.BOW,
             Material.FLINT_AND_STEEL, Material.SHIELD, Material.ELYTRA,
@@ -39,34 +39,34 @@ public class EnchantHelper {
             Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_HELMET,
             Material.GOLDEN_BOOTS, Material.GOLDEN_LEGGINGS,
             Material.GOLDEN_CHESTPLATE, Material.GOLDEN_HELMET,
-            Material.ENCHANTED_BOOK);
+            Material.ENCHANTED_BOOK);*/
     
-    private static List<Material> enchantability_25 = Arrays.asList(
+    private static final List<Material> enchantability_25 = Arrays.asList(
             Material.GOLDEN_BOOTS, Material.GOLDEN_LEGGINGS, 
             Material.GOLDEN_CHESTPLATE, Material.GOLDEN_HELMET);
     
-    private static List<Material> enchantability_22 = Arrays.asList(
+    private static final List<Material> enchantability_22 = Arrays.asList(
             Material.GOLDEN_AXE,
             Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, Material.GOLDEN_SHOVEL, 
             Material.GOLDEN_SWORD);
     
-    private static List<Material> enchantability_15 = Arrays.asList(
+    private static final List<Material> enchantability_15 = Arrays.asList(
             Material.WOODEN_AXE, Material.WOODEN_HOE, Material.WOODEN_PICKAXE, 
             Material.WOODEN_SHOVEL, Material.WOODEN_SWORD, Material.LEATHER_BOOTS, 
             Material.LEATHER_LEGGINGS, Material.LEATHER_CHESTPLATE, 
             Material.LEATHER_HELMET);
     
-    private static List<Material> enchantability_14 = Arrays.asList(
+    private static final List<Material> enchantability_14 = Arrays.asList(
             Material.IRON_AXE, 
             Material.IRON_HOE, Material.IRON_PICKAXE, Material.IRON_SHOVEL, 
             Material.IRON_SWORD);
     
-    private static List<Material> enchantability_12 = Arrays.asList(
+    private static final List<Material> enchantability_12 = Arrays.asList(
             Material.CHAINMAIL_BOOTS,
             Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_CHESTPLATE, 
             Material.CHAINMAIL_HELMET);
     
-    private static List<Material> enchantability_10 = Arrays.asList(
+    private static final List<Material> enchantability_10 = Arrays.asList(
             Material.DIAMOND_AXE, 
             Material.DIAMOND_HOE, Material.DIAMOND_PICKAXE, 
             Material.DIAMOND_SHOVEL,
@@ -74,25 +74,22 @@ public class EnchantHelper {
             Material.DIAMOND_LEGGINGS,
             Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET);
     
-    private static List<Material> enchantability_9 = Arrays.asList(
+    private static final List<Material> enchantability_9 = Arrays.asList(
             Material.IRON_BOOTS, 
             Material.IRON_LEGGINGS, Material.IRON_CHESTPLATE, 
             Material.IRON_HELMET);
     
-    private static List<Material> enchantability_5 = Arrays.asList(
+    private static final List<Material> enchantability_5 = Arrays.asList(
             Material.STONE_AXE,
             Material.STONE_HOE, Material.STONE_PICKAXE, Material.STONE_SHOVEL, 
             Material.STONE_SWORD);
-    
-    private static List<Enchantment> treasure = Arrays.asList(
-            Enchantment.FROST_WALKER, Enchantment.MENDING, Enchantment.BINDING_CURSE, Enchantment.VANISHING_CURSE);
     
     public EnchantHelper(CustomVillageTrades instance) {
         plugin = instance;
     }
     
     // return a number not bigger than max or smaller that min, initially num
-    public static int clampInt(int num, int min, int max) {
+    private static int clampInt(int num, int min, int max) {
         return num < min ? min : (num > max ? max : num);
     }
     
@@ -106,6 +103,8 @@ public class EnchantHelper {
                 possibilities.add(enchantment);
             }
         }
+
+        plugin.getLogger().info(Integer.toString(possibilities.size()) + " possibilities to enchant " + item.getType().toString());
         
         return possibilities.get(rand.nextInt(possibilities.size()));
     }
@@ -114,14 +113,14 @@ public class EnchantHelper {
     public  ItemStack randomlyEnchantBook( 
             ItemStack enchantedBook, boolean allowTreasure) {
         Enchantment type = getRandomEnchantment(enchantedBook);
-        while (!(!treasure.contains(type) || allowTreasure)) {
+        while (!(!type.isTreasure() || allowTreasure)) {
             type = getRandomEnchantment(enchantedBook);
         }
         
         int level = rand.nextInt(type.getMaxLevel()) + 1;
         
         LeveledEnchantment enchantment = 
-                new LeveledEnchantment(plugin, type.getKey().toString(), level);
+                new LeveledEnchantment(plugin, type.getKey().getKey(), level);
         
         enchantedBook = applyEnchantment(enchantedBook, enchantment);
         
@@ -133,7 +132,8 @@ public class EnchantHelper {
     public  ItemStack randomlyEnchant(ItemStack item, int level, 
             boolean allowTreasure) {
         
-        if (enchantableItems.contains(item.getType())) {
+        if (Enchantment.VANISHING_CURSE.canEnchantItem(item)) {
+            plugin.getLogger().info("Item can be enchanted...");
             boolean isBook = item.getType() == Material.BOOK;
             List<LeveledEnchantment> enchants = new ArrayList<LeveledEnchantment>();
 
@@ -147,6 +147,7 @@ public class EnchantHelper {
             }
             
             for (LeveledEnchantment enchantment : enchants) {
+                plugin.getLogger().info("Applying enchantment to item:" + enchantment.toString());
                 item = applyEnchantment(item, enchantment);
             }
         }
@@ -155,8 +156,8 @@ public class EnchantHelper {
     }
     
     // Builds a list of semi-random enchantments for given item
-    public  List<LeveledEnchantment> buildLeveledEnchantmentList(ItemStack item,
-            int level, boolean allowTreasure) {
+    private List<LeveledEnchantment> buildLeveledEnchantmentList(ItemStack item,
+                                                                 int level, boolean allowTreasure) {
         List<LeveledEnchantment> enchants = new ArrayList<LeveledEnchantment>();
         int enchantability;
         
@@ -194,23 +195,19 @@ public class EnchantHelper {
         level = clampInt(Math.round((float)level + (float)level * margin),
                 1, Integer.MAX_VALUE);
         
-        List<LeveledEnchantment> possibilities = getLeveledEnchantments(item,
-                level, allowTreasure);
+        List<LeveledEnchantment> possibilities = getLeveledEnchantments(item, level, allowTreasure);
         
         if (!possibilities.isEmpty()) {
-            enchants.add(LeveledEnchantment.getRandomLeveledEnchant(plugin,
-                    possibilities, rand));
+            enchants.add(LeveledEnchantment.getRandomLeveledEnchant(possibilities, rand));
             
             while (rand.nextInt(50) <= level) {
-                possibilities = removeIncompatibleEnchants(
-                        possibilities, enchants);
+                possibilities = removeIncompatibleEnchants(possibilities, enchants);
                 
                 if (possibilities.isEmpty()) {
                     break;
                 }
                 
-                enchants.add(LeveledEnchantment.getRandomLeveledEnchant(plugin,
-                        possibilities, rand));
+                enchants.add(LeveledEnchantment.getRandomLeveledEnchant(possibilities, rand));
                 level /= 2;
             }
         }
@@ -219,14 +216,14 @@ public class EnchantHelper {
     }
     
     // Get all enchantments that might apply to an item
-    public  List<LeveledEnchantment> getLeveledEnchantments(ItemStack item,
-            int level, boolean allowTreasure) {
+    private List<LeveledEnchantment> getLeveledEnchantments(ItemStack item,
+                                                            int level, boolean allowTreasure) {
         List<LeveledEnchantment> enchants = new ArrayList<LeveledEnchantment>();
         boolean isBook = item.getType() == Material.ENCHANTED_BOOK;
         
         for (Enchantment enchantment : Enchantment.values()) {
             
-            if ((!treasure.contains(enchantment) || allowTreasure) && 
+            if ((!enchantment.isTreasure() || allowTreasure) &&
                     (enchantment.canEnchantItem(item) || isBook)) {
                 
                 for (int i = enchantment.getMaxLevel(); 
@@ -235,7 +232,7 @@ public class EnchantHelper {
                     if (level >= (1 + i * 10) && level <= ((1 + i * 10) + 5)) {
                         
                         enchants.add(new LeveledEnchantment(plugin,
-                                enchantment.getKey().toString(), i));
+                                enchantment.getKey().getKey(), i));
                     }
                 }
             }
@@ -245,7 +242,7 @@ public class EnchantHelper {
     }
     
     // Remove enchantments from the pool of possibilities based on selected
-    public  List<LeveledEnchantment> removeIncompatibleEnchants(
+    private List<LeveledEnchantment> removeIncompatibleEnchants(
             List<LeveledEnchantment> pool, List<LeveledEnchantment> enchants) {
         List<LeveledEnchantment> newPool = new ArrayList<LeveledEnchantment>();
         newPool.addAll(pool);
@@ -262,7 +259,7 @@ public class EnchantHelper {
     }
     
     // Either applies or stores enchantments as appropriate for item type
-    public  ItemStack applyEnchantment(ItemStack item, 
+    public ItemStack applyEnchantment(ItemStack item,
             LeveledEnchantment enchantment) {
         if (item.getType().equals(Material.ENCHANTED_BOOK)) {
             EnchantmentStorageMeta meta = 
@@ -279,7 +276,7 @@ public class EnchantHelper {
     }
     
     // Gets a vanilla-appropriate value in currency for an enchanted book
-    public  ItemStack appraiseEnchantedBook(
+    public ItemStack appraiseEnchantedBook(
             FileConfiguration f, ItemStack book) {
         ItemStack price = new ItemStack(plugin.getCurrency(f));
         
@@ -334,7 +331,7 @@ public class EnchantHelper {
                 amount = 1;
         }
         
-        if (treasure.contains(type)) {
+        if (type.isTreasure()) {
             amount *= 2;
         }
         

@@ -2,17 +2,18 @@ package com.alfalfascout.CustomVillageTrades;
 
 import org.bukkit.enchantments.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class LeveledEnchantment extends EnchantmentWrapper {
-    static CustomVillageTrades plugin;
+    private static CustomVillageTrades plugin;
     private int level;
     private int weight;
     
     public LeveledEnchantment(CustomVillageTrades instance, String name, int level) {
         super(name);
         this.level = level;
-        this.setWeight(this.getEnchantment().getKey().toString());
+        this.setWeight(this.getEnchantment().getKey().getKey());
         plugin = instance;
     }
     
@@ -24,18 +25,18 @@ public class LeveledEnchantment extends EnchantmentWrapper {
         return this.weight;
     }
 
-    public LeveledEnchantment setWeight(String name) {
-        if (name == "PROTECTION_ENVIRONMENTAL" || name == "DAMAGE_ALL" || name == "DIG_SPEED"
-            || name == "ARROW_DAMAGE") {
+    private LeveledEnchantment setWeight(String name) {
+        if (name.equals("PROTECTION_ENVIRONMENTAL") || name.equals("DAMAGE_ALL") || name.equals("DIG_SPEED")
+            || name.equals("ARROW_DAMAGE")) {
             this.weight = 10;
         }
-        if (name == "PROTECTION_FIRE" || name == "PROTECTION_FALL" || name == "PROTECTION_PROJECTILE" ||
-                name == "DAMAGE_UNDEAD" || name == "DAMAGE_ARTHROPODS" || name == "KNOCKBACK" ||
-                name == "DURABILITY") {
+        if (name.equals("PROTECTION_FIRE") || name.equals("PROTECTION_FALL") || name.equals("PROTECTION_PROJECTILE") ||
+                name.equals("DAMAGE_UNDEAD") || name.equals("DAMAGE_ARTHROPODS") || name.equals("KNOCKBACK") ||
+                name.equals("DURABILITY")) {
             this.weight = 5;
         }
-        if (name == "THORNS" || name == "SILK_TOUCH" || name == "ARROWS_INFINITE" || name == "BINDING_CURSE" ||
-                name == "VANISHING_CURSE") {
+        if (name.equals("THORNS") || name.equals("SILK_TOUCH") || name.equals("ARROWS_INFINITE") || name.equals("BINDING_CURSE") ||
+                name.equals("VANISHING_CURSE")) {
             this.weight = 1;
         }
         else {
@@ -45,8 +46,7 @@ public class LeveledEnchantment extends EnchantmentWrapper {
     }
     
     // get one (weighted) random leveled enchantment from a list
-    public static LeveledEnchantment getRandomLeveledEnchant(
-            CustomVillageTrades instance, 
+    static LeveledEnchantment getRandomLeveledEnchant(
             List<LeveledEnchantment> list, Random rand) {
         LeveledEnchantment chosenEnchant;
         int totalWeight = 0;

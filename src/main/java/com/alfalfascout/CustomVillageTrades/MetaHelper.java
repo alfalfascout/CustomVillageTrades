@@ -4,12 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Random;
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.DyeColor;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,23 +24,30 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.*;
+import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.BookMeta.Generation;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
-public class MetaHelper {
+class MetaHelper {
     private static CustomVillageTrades plugin;
     private static EnchantHelper enchHelper;
-    private static Random rand = new Random();
+    private static final Random rand = new Random();
     
-    public MetaHelper(CustomVillageTrades instance) {
+    MetaHelper(CustomVillageTrades instance) {
         plugin = instance;
         enchHelper = plugin.enchHelper;
     }
     
-    public ItemStack getItemName(FileConfiguration f, ItemStack item,
-                                  String path) {
+    ItemStack getItemName(FileConfiguration f, ItemStack item,
+                          String path) {
         ItemMeta meta = item.getItemMeta();
         
         if (f.isString(path + ".name")) {
@@ -48,7 +62,7 @@ public class MetaHelper {
         return item;
     }
     
-    public ItemStack getItemLore(FileConfiguration f, ItemStack item,
+    ItemStack getItemLore(FileConfiguration f, ItemStack item,
                                   String path) {
         ItemMeta meta = item.getItemMeta();
         if (f.isString(path + ".lore")) {
@@ -65,7 +79,7 @@ public class MetaHelper {
         return item;
     }
     
-    public ItemStack handlePotion(FileConfiguration f, ItemStack item,
+    ItemStack handlePotion(FileConfiguration f, ItemStack item,
                                   String path) {
         PotionMeta meta = (PotionMeta) item.getItemMeta();
         PotionType potionType = PotionType.WATER;
@@ -122,7 +136,7 @@ public class MetaHelper {
         return item;
     }
     
-    public ItemStack handleBanner(FileConfiguration f, ItemStack item, 
+    ItemStack handleBanner(FileConfiguration f, ItemStack item,
             String path) {
         BannerMeta meta = (BannerMeta) item.getItemMeta();
         if (f.contains(path + ".banner") && f.isString(path + ".banner")) {
@@ -140,7 +154,7 @@ public class MetaHelper {
             // patterns
             int patternNum = 1;
             String pPath = "pattern" + Integer.toString(patternNum);
-            List<Pattern> patterns = new ArrayList<Pattern>();
+            List<Pattern> patterns = new ArrayList<>();
             
             while (b.contains(pPath) && patternNum <= 6) {
                 DyeColor pColor = DyeColor.WHITE;
@@ -181,7 +195,7 @@ public class MetaHelper {
         return item;
     }
     
-    public ItemStack handleSkull(FileConfiguration f, ItemStack item,
+    ItemStack handleSkull(FileConfiguration f, ItemStack item,
             String path) {
         if (f.contains(path + ".owner") && f.isString(path + ".owner")) {
             SkullMeta meta = (SkullMeta) item.getItemMeta();
@@ -192,7 +206,7 @@ public class MetaHelper {
         return item;
     }
     
-    public ItemStack handleBook(FileConfiguration f, ItemStack item,
+    ItemStack handleBook(FileConfiguration f, ItemStack item,
             String path) {
         BookMeta meta = (BookMeta) item.getItemMeta();
         if (f.contains(path + ".book") && f.isString(path + ".book")) {
@@ -220,7 +234,7 @@ public class MetaHelper {
             }
             
             if (b.contains("pages", true)) {
-                List<String> pages = new ArrayList<String>();
+                List<String> pages = new ArrayList<>();
                 int pageNum = 1;
                 String pagePath = "pages.page" + Integer.toString(pageNum);
                 
@@ -240,7 +254,7 @@ public class MetaHelper {
         return item;
     }
     
-    public ItemStack handleRocket(FileConfiguration f, ItemStack item,
+     ItemStack handleRocket(FileConfiguration f, ItemStack item,
             String path) {
         FireworkMeta meta = (FireworkMeta) item.getItemMeta();
         if (f.contains(path + ".firework") && f.isString(path + ".firework")) {
@@ -255,7 +269,7 @@ public class MetaHelper {
                     YamlConfiguration.loadConfiguration(fireworkFile);
             
             int power = 1;
-            List<FireworkEffect> effects = new ArrayList<FireworkEffect>();
+            List<FireworkEffect> effects = new ArrayList<>();
             
             if (b.contains("power") && b.isInt("power") &&
                     b.getInt("power") > -1) {
@@ -284,7 +298,7 @@ public class MetaHelper {
         return item;
     }
     
-    public ItemStack handleFireworkStar(FileConfiguration f, ItemStack item,
+     ItemStack handleFireworkStar(FileConfiguration f, ItemStack item,
             String path) {
         FireworkEffectMeta meta = (FireworkEffectMeta) item.getItemMeta();
         if (f.contains(path + ".firework") && f.isString(path + ".firework")) {
@@ -305,10 +319,10 @@ public class MetaHelper {
         return item;
     }
     
-    public FireworkEffect buildFirework(ConfigurationSection f) {
+    private FireworkEffect buildFirework(ConfigurationSection f) {
         FireworkEffect.Type type = FireworkEffect.Type.BALL;
-        List<Color> colors = new ArrayList<Color>();
-        List<Color> fades = new ArrayList<Color>();
+        List<Color> colors = new ArrayList<>();
+        List<Color> fades = new ArrayList<>();
         boolean flicker = false;
         boolean trail = false;
         
@@ -379,7 +393,7 @@ public class MetaHelper {
         return builder.build();
     }
     
-    public ItemStack handleEnchantment(FileConfiguration f, ItemStack item,
+     ItemStack handleEnchantment(FileConfiguration f, ItemStack item,
             String path) {
         // get user-specified enchantments
         if (f.contains(path + ".enchantment.enchant1")) {
@@ -398,7 +412,7 @@ public class MetaHelper {
                         specType = enchHelper.getRandomEnchantment(item);
                     }
                     else {
-                        specType = Enchantment.getByName(typeString);
+                        specType = Enchantment.getByKey(new NamespacedKey(plugin, typeString));
                     }
                 
                     if (specType == null) {
@@ -423,7 +437,7 @@ public class MetaHelper {
                 }
             
                 LeveledEnchantment specEnchant = new LeveledEnchantment(
-                        plugin, specType.getKey().toString(), specLevel);
+                        plugin, specType.getKey().getKey(), specLevel);
             
                 if (specEnchant.canEnchantItem(item) ||
                         item.getType().equals(Material.ENCHANTED_BOOK)) {
@@ -449,6 +463,7 @@ public class MetaHelper {
             if (f.contains(path + ".enchantment.level")) {
                 try {
                     level = f.getInt(path + ".enchantment.level");
+                    plugin.getLogger().info("Got enchantment level: " + level);
                     if (level < 0) {
                         plugin.getLogger().warning(
                                 "Enchantment level must be greater than zero.");
@@ -479,48 +494,73 @@ public class MetaHelper {
                 item.setType(Material.ENCHANTED_BOOK);
                 item = enchHelper.randomlyEnchantBook(item, allowTreasure);
             } else {
+                plugin.getLogger().info("calling enchHelper.randomlyEnchant");
                 item = enchHelper.randomlyEnchant(item, level, allowTreasure);
             }
         }
+
+        plugin.getLogger().info("Item has enchantments? " + item.getEnchantments().size());
         return item;
     }
 
-    public ItemStack handleFilledMap(FileConfiguration f, ItemStack mapItem, String path, Location villagerLocation) {
-        //MapMeta mapMeta = (MapMeta) mapItem.getItemMeta();
-        //get user-specified map type
+     ItemStack handleFilledMap(FileConfiguration f, ItemStack mapItem, String path, Location villagerLocation) {
+        String structureIconType;
+        String structureType = "";
+
+        // get the user's specified map type
         if (f.contains(path + ".type")) {
-            plugin.getLogger().info(villagerLocation.toString() + f.getString(path + ".type"));
-
-            try {
-                mapItem = (ItemStack) createExplorerMap(villagerLocation.getWorld(), villagerLocation, "Monument");
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            }
-
-            // FIXME: 14 Sep 2018 Name the map with the proper localized string unless told otherwise
+             structureType = f.getString(path + ".type");
         }
+        List<String> validTypes = Arrays.asList("Buried_Treasure", "EndCity", "Fortress", "Mansion", "Mineshaft",
+                "Monument", "Ocean_Ruin", "Shipwreck", "Stronghold", "Desert_Pyramid", "Igloo", "Jungle_Pyramid",
+                "Swamp_Hut", "Village");
+        for (String validType : validTypes) { // check if it's roughly equal to a valid type, and if so, correct the case
+            if (structureType.equalsIgnoreCase(validType)) {
+                structureType = validType;
+                plugin.getLogger().info("Recognized structure type: " + structureType);
+            }
+        }
+        if (!validTypes.contains(structureType)) { // if it's not a valid type, make it a valid type
+            plugin.getLogger().warning("Unrecognized structure type '" + structureType + "' at " + path);
+            structureType = "Buried_Treasure";
+        }
+
+        // get the user's specified map icon if available, or pick one based on the structure type
+        if (f.contains(path + ".icon")) { structureIconType = f.getString(path + ".icon"); }
+        else if (structureType.equals("Mansion")) { structureIconType = "MANSION"; }
+        else if (structureType.equals("Monument")) { structureIconType = "MONUMENT"; }
+        else { structureIconType = "RED_X"; }
+
+        try {
+            mapItem = (ItemStack) createExplorerMap(villagerLocation.getWorld(), villagerLocation, structureType, structureIconType);
+        } catch (NoSuchMethodException | InstantiationException | ClassNotFoundException | InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        MapMeta mapMeta = (MapMeta) mapItem.getItemMeta();
+
+        // get the user's specified map name, if available, or pick one based on structure type
+        if (f.contains(path + ".name")) { mapMeta.setDisplayName(f.getString(path + ".name")); }
+        else if (structureType.equals("Buried_Treasure")) { mapMeta.setDisplayName("Buried Treasure Map"); }
+        else if (structureType.equals("Monument")) { mapMeta.setDisplayName("Ocean Explorer Map"); }
+        else if (structureType.equals("Mansion")) { mapMeta.setDisplayName("Woodland Explorer Map"); }
+        else { mapMeta.setDisplayName("Explorer Map"); }
 
         return mapItem;
     }
 
 
-    
-    public void makeBannerFile(ItemStack bannerItem) {
+    // make a yml that represents a banner item
+    void makeBannerFile(ItemStack bannerItem) {
+        // if the item isn't a banner, don't bother
         if (!bannerItem.getType().toString().contains("BANNER")) {
             plugin.getLogger().info("That's not a banner.");
             return;
         }
         BannerMeta bannerMeta = (BannerMeta) bannerItem.getItemMeta();
-        
-        Integer bannerNo = new Integer(1);
+
+        // make the next banner file we can in order starting from 1
+        Integer bannerNo = 1;
         String bannerName = "banner" + bannerNo.toString() + ".yml";
         File bannerFile = new File(plugin.getDataFolder(), bannerName);
         try {
@@ -535,8 +575,10 @@ public class MetaHelper {
         
         FileConfiguration bannerConf = new YamlConfiguration();
 
+        // write material to the file
         bannerConf.set("material", bannerItem.getType().name().toLowerCase());
-        
+
+        // write each pattern to the file
         int pNum = 1;
         String pPath = "pattern" + Integer.toString(pNum);
         for (Pattern pattern : bannerMeta.getPatterns()) {
@@ -545,23 +587,27 @@ public class MetaHelper {
             pNum++;
             pPath = "pattern" + Integer.toString(pNum);
         }
-        
+
+        // save the file
         try {
             bannerConf.save(bannerFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
-    public void makeBookFile(ItemStack bookItem) {
+
+    // make a yml that represents a book item
+    void makeBookFile(ItemStack bookItem) {
+        // if it's not a book, don't bother
         if (!(bookItem.getType().equals(Material.WRITTEN_BOOK) ||
                 bookItem.getType().equals(Material.WRITABLE_BOOK))) {
             plugin.getLogger().info("That's not a book.");
             return;
         }
         BookMeta bookMeta = (BookMeta) bookItem.getItemMeta();
-        
-        Integer bookNo = new Integer(1);
+
+        // write the next book file we possibly can starting from 1
+        Integer bookNo = 1;
         String bookName = "book" + bookNo.toString() + ".yml";
         File bookFile = new File(plugin.getDataFolder(), bookName);
         try {
@@ -575,7 +621,8 @@ public class MetaHelper {
         }
         
         FileConfiguration bookConf = new YamlConfiguration();
-        
+
+        // write author, title, generation data to file
         if (bookMeta.hasAuthor()) {
             bookConf.set("author", bookMeta.getAuthor());
         }
@@ -587,7 +634,8 @@ public class MetaHelper {
         if (bookMeta.getGeneration() != null) {
             bookConf.set("status", bookMeta.getGeneration().name());
         }
-        
+
+        // write each book page to file
         if (bookMeta.hasPages()) {
             bookConf.createSection("pages");
             String page = "";
@@ -598,22 +646,25 @@ public class MetaHelper {
                 bookConf.set(path, page);
             }
         }
-        
+
+        // save the file
         try {
             bookConf.save(bookFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
-    public void makeFireworkFile(ItemStack fwItem) {
+
+    // make a yml that represents a firework item
+    void makeFireworkFile(ItemStack fwItem) {
         if (!(fwItem.getType().equals(Material.FIREWORK_ROCKET) ||
                 fwItem.getType().equals(Material.FIREWORK_STAR))) {
             plugin.getLogger().info("That's not a firework.");
             return;
         }
-        
-        Integer fwNo = new Integer(1);
+
+        // create the next firework file we possibly can, starting from 1
+        Integer fwNo = 1;
         String fwName = "firework" + fwNo.toString() + ".yml";
         File fwFile = new File(plugin.getDataFolder(), fwName);
         try {
@@ -627,11 +678,13 @@ public class MetaHelper {
         }
         
         FileConfiguration fwConf = new YamlConfiguration();
-        
+
+        // write rocket power and effects to file
         if (fwItem.getType().equals(Material.FIREWORK_ROCKET)) {
             FireworkMeta fwMeta = (FireworkMeta) fwItem.getItemMeta();
             fwConf.set("power", fwMeta.getPower());
-            
+
+            // write each effect to file
             List<FireworkEffect> fwEffects = fwMeta.getEffects();
             int i = 1;
             String path = "effects.effect" + Integer.toString(i);
@@ -641,12 +694,13 @@ public class MetaHelper {
                 path = "effects.effect" + Integer.toString(i);
             }
         }
-        else {
+        else { // write star effects to file
             FireworkEffectMeta fwMeta =
                     (FireworkEffectMeta) fwItem.getItemMeta();
             recordFireworkEffect(fwConf, fwMeta.getEffect(), "");
         }
-        
+
+        // save file
         try {
             fwConf.save(fwFile);
         }
@@ -654,9 +708,10 @@ public class MetaHelper {
             e.printStackTrace();
         }
     }
-    
-    public void recordFireworkEffect(FileConfiguration fwConf,
-            FireworkEffect effect, String path) {
+
+    // utility for recording firework effects
+    private void recordFireworkEffect(FileConfiguration fwConf,
+                                      FireworkEffect effect, String path) {
         if (path.equals("")) {
             fwConf.addDefaults(effect.serialize());
             fwConf.options().copyDefaults(true);
@@ -666,7 +721,8 @@ public class MetaHelper {
         }
     }
 
-    public org.bukkit.Color dyeToFirework(DyeColor dye) {
+    // get firework color from dye color. used to be necessary in 1.10, not sure if necessary nowadays
+    private org.bukkit.Color dyeToFirework(DyeColor dye) {
         Color color = dye.getColor();
         if (dye.equals(DyeColor.BLACK)) {
             color = Color.fromRGB(30, 27, 27);
@@ -719,8 +775,15 @@ public class MetaHelper {
         return color;
     }
 
+    // create an explorer map with a guesstimated icon based on map type
+    private Object createExplorerMap(World world, Location loc, String structureType) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        if (structureType.equals("Mansion")) { return createExplorerMap(world, loc, structureType, "MANSION"); }
+        else if (structureType.equals("Monument")) { return createExplorerMap(world, loc, structureType, "MONUMENT"); }
+        else { return createExplorerMap(world, loc, structureType, "RED_X"); }
+    }
+
     // Code by Ugleh on spigotmc.org forums to search for nearby structures and generate map, partly modified to support more structure icons
-    private Object createExplorerMap(World world, Location loc, String structureType) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
+    private Object createExplorerMap(World world, Location loc, String structureType, String structureIconType) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
         Object structurePosition = getStructure(loc, structureType);
         int structureX = (int) getNMSClass("BlockPosition").getMethod("getX").invoke(structurePosition);
         int structureZ = (int) getNMSClass("BlockPosition").getMethod("getZ").invoke(structurePosition);
@@ -728,11 +791,12 @@ public class MetaHelper {
         Method getHandle = loc.getWorld().getClass().getMethod("getHandle");
         Object nmsWorld = getHandle.invoke(loc.getWorld());
 
-        String structureIconType = structureType.toUpperCase();
+        structureIconType = structureIconType.toUpperCase();
         if (!(Arrays.asList("PLAYER", "FRAME","RED_MARKER","BLUE_MARKER","TARGET_X","TARGET_POINT","PLAYER_OFF_LIMITS",
                 "MANSION","MONUMENT","RED_X","BANNER_BLACK","BANNER_BLUE","BANNER_BROWN","BANNER_CYAN","BANNER_GRAY",
                 "BANNER_GREEN","BANNER_LIGHT_BLUE","BANNER_LIGHT_GRAY","BANNER_LIME","BANNER_MAGENTA","BANNER_ORANGE",
                 "BANNER_PINK","BANNER_PURPLE","BANNER_RED","BANNER_WHITE","BANNER_YELLOW").contains(structureIconType))) {
+            plugin.getLogger().warning("Unrecognized map icon '" + structureIconType);
             structureIconType = "RED_X";
         }
 
